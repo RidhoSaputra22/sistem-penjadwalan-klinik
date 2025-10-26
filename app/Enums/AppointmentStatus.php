@@ -2,7 +2,10 @@
 
 namespace App\Enums;
 
-enum AppointmentStatus: string
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
+
+enum AppointmentStatus: string implements HasLabel, HasColor
 {
     case PENDING = 'pending';
     case CONFIRMED = 'confirmed';
@@ -10,7 +13,7 @@ enum AppointmentStatus: string
     case DONE = 'done';
     case CANCELLED = 'cancelled';
 
-    public function label(): string
+    public function getLabel(): string
     {
         return match ($this) {
             self::PENDING => 'Menunggu Konfirmasi',
@@ -21,7 +24,7 @@ enum AppointmentStatus: string
         };
     }
 
-    public function color(): string
+    public function getColor(): string
     {
         return match ($this) {
             self::PENDING => 'gray',

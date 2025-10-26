@@ -2,12 +2,14 @@
 
 namespace App\Enums;
 
-enum HolidayType: string
+use Filament\Support\Contracts\HasLabel;
+
+enum HolidayType: string implements HasLabel
 {
     case FULL_DAY = 'full_day';
     case HALF_DAY = 'half_day';
 
-    public function label(): string
+    public function getLabel(): string
     {
         return match ($this) {
             self::FULL_DAY => 'Libur Sehari Penuh',

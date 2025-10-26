@@ -2,13 +2,15 @@
 
 namespace App\Enums;
 
-enum UserRole: string
+use Filament\Support\Contracts\HasLabel;
+
+enum UserRole: string implements HasLabel
 {
     case DOCTOR = 'doctor';
     case RECEPTIONIST = 'receptionist';
     case ADMIN = 'admin';
 
-    public function label(): string
+    public function getLabel(): string
     {
         return match ($this) {
             self::DOCTOR => 'Dokter',

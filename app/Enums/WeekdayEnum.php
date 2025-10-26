@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-enum WeekdayEnum: int
+use Filament\Support\Contracts\HasLabel;
+
+enum WeekdayEnum: int implements HasLabel
 {
     case SUNDAY = 0;
     case MONDAY = 1;
@@ -12,7 +14,7 @@ enum WeekdayEnum: int
     case FRIDAY = 5;
     case SATURDAY = 6;
 
-    public function label(): string
+    public function getLabel(): ?string
     {
         return match ($this) {
             self::SUNDAY => 'Minggu',
