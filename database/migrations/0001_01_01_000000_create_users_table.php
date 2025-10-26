@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -17,9 +18,49 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('phone')->nullable();
+            $table->enum('role', ['doctor', 'receptionist', 'admin'])->default('doctor');
+            $table->string('title')->nullable(); // dr., Sp.KJ, etc.
+            $table->text('notes')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
+
+        DB::table('users')->insert([
+            [
+                'name' => 'Dr. Andi Setiawan',
+                'email' => 'andi@klinik.com',
+                'password' => bcrypt('password123'),
+                'phone' => '081234567890',
+                'role' => 'doctor',
+                'title' => 'dr., Sp.KJ',
+                'notes' => 'Dokter spesialis kejiwaan dengan jadwal pagi.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Siti Rahma',
+                'email' => 'siti@klinik.com',
+                'password' => bcrypt('password123'),
+                'phone' => '082345678901',
+                'role' => 'receptionist',
+                'title' => null,
+                'notes' => 'Bertanggung jawab pada pendaftaran pasien dan jadwal dokter.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Admin Klinik',
+                'email' => 'admin@klinik.com',
+                'password' => bcrypt('password123'),
+                'phone' => '083456789012',
+                'role' => 'admin',
+                'title' => null,
+                'notes' => 'Akun admin utama sistem klinik.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
