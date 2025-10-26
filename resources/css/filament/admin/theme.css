@@ -1,0 +1,31 @@
+@import "../../../../vendor/filament/filament/resources/css/theme.css";
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+.fi-sidebar {
+    @apply bg-green-700;
+}
+
+/* Sidebar Item Styles */
+.fi-sidebar-item-label,
+.fi-sidebar-item-icon,
+.fi-sidebar-group-label {
+    @apply text-white;
+}
+
+/* Active Sidebar Item Styles */
+.fi-sidebar-item.fi-active.fi-sidebar-item-has-url {
+    .fi-sidebar-item-label,
+    .fi-sidebar-item-icon {
+        @apply text-green-800;
+    }
+}
+
+/* Hovered Sidebar Item Styles */
+.fi-sidebar-item:hover {
+    .fi-sidebar-item-label,
+    .fi-sidebar-item-icon {
+        @apply text-green-800;
+    }
+}
