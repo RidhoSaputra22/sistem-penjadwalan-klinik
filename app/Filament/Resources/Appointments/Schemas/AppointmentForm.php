@@ -52,13 +52,13 @@ class AppointmentForm
                 Select::make('doctor_id')
                     ->label('Dokter')
                     ->relationship('doctor', 'name')
-                    ->required()
+                    ->disabled()
                     ->searchable()
                     ->preload(),
                 Select::make('room_id')
                     ->label('Ruangan')
                     ->relationship('room', 'name')
-                    ->required()
+                    ->disabled()
                     ->searchable()
                     ->preload(),
                 DatePicker::make('scheduled_date')
@@ -75,7 +75,7 @@ class AppointmentForm
                     ->label('Waktu Selesai')
                     ->default(now())
                     ->native(false)
-                    ->required(),
+                    ->disabled(),
                 Select::make('status')
                     ->label('Status')
                     ->native(false)

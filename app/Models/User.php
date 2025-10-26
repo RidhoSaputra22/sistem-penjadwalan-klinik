@@ -60,7 +60,7 @@ class User extends Authenticatable
     // === Relasi ===
     public function services(): BelongsToMany
     {
-        return $this->belongsToMany(Service::class, 'doctor_service')->withTimestamps();
+        return $this->belongsToMany(Service::class, 'doctor_services')->withTimestamps();
     }
 
     public function appointments(): HasMany
