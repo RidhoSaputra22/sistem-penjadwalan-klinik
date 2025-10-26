@@ -15,11 +15,14 @@ class DoctorAvailabilityForm
     {
         return $schema
             ->components([
-                TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
+                Select::make('user_id')
+                    ->relationship('doctor', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 Select::make('weekday')
                     ->options(WeekdayEnum::class)
+                    ->native(false)
                     ->required(),
                 TimePicker::make('start_time')
                     ->required(),

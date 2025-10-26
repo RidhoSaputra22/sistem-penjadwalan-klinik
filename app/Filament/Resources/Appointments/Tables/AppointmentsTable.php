@@ -15,37 +15,51 @@ class AppointmentsTable
         return $table
             ->columns([
                 TextColumn::make('code')
+                    ->label('Kode')
                     ->searchable(),
-                TextColumn::make('patient_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('service_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('doctor_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('room_id')
-                    ->numeric()
-                    ->sortable(),
+                TextColumn::make('patient.name')
+                    ->label('Pasien')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('service.name')
+                    ->label('Pelayanan')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('doctor.name')
+                    ->label('Dokter')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('room.name')
+                    ->label('Ruangan')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('scheduled_date')
+                    ->label('Tanggal')
                     ->date()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('scheduled_start')
+                    ->label('Waktu Mulai')
                     ->time()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('scheduled_end')
+                    ->label('Waktu Selesai')
                     ->time()
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('status')
+                    ->label('Statu')
                     ->badge(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
+                    ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

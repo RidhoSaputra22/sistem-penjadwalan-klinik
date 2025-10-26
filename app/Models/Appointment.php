@@ -4,11 +4,12 @@ namespace App\Models;
 
 use App\Models\Room;
 use App\Models\User;
+use App\Enums\UserRole;
 use App\Models\Patient;
 use App\Models\Service;
+use App\Helpers\CodeGenerator;
 use App\Enums\AppointmentStatus;
 use App\Helpers\AppointmentHelper;
-use App\Helpers\CodeGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -52,7 +53,7 @@ class Appointment extends Model
 
     public function doctor()
     {
-        return $this->belongsTo(User::class, 'doctor_id');
+        return $this->belongsTo(User::class, 'doctor_id')->where('role', UserRole::DOCTOR);
     }
 
     public function service()

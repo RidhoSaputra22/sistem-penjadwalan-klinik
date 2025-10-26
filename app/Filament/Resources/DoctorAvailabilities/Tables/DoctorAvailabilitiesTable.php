@@ -15,20 +15,25 @@ class DoctorAvailabilitiesTable
     {
         return $table
             ->columns([
-                TextColumn::make('user_id')
-                    ->numeric()
+                TextColumn::make('doctor.name')
+                    ->label('Dokter')
                     ->sortable(),
                 TextColumn::make('weekday')
+                    ->label('Hari')
                     ->sortable(),
                 TextColumn::make('start_time')
+                    ->label('Waktu Mulai')
                     ->time()
                     ->sortable(),
                 TextColumn::make('end_time')
+                    ->label('Waktu Selesai')
                     ->time()
                     ->sortable(),
                 IconColumn::make('is_active')
+                    ->label('Aktif')
                     ->boolean(),
                 TextColumn::make('created_at')
+
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

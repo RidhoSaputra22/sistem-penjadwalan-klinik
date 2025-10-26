@@ -12,10 +12,14 @@ class RoomForm
     {
         return $schema
             ->components([
+                TextInput::make('code')
+                    ->label('Kode')
+                    ->disabled(),
                 TextInput::make('name')
+                    ->label('Nama')
                     ->required(),
-                TextInput::make('code'),
                 Textarea::make('notes')
+                    ->label('Catatan')
                     ->columnSpanFull(),
             ]);
     }

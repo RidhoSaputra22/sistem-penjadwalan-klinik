@@ -14,9 +14,14 @@ class HolidayForm
         return $schema
             ->components([
                 DatePicker::make('date')
+                    ->label('Tanggal')
+                    ->native(false)
                     ->required(),
-                TextInput::make('name'),
+                TextInput::make('name')
+                    ->label('Nama')
+                    ->required(),
                 Toggle::make('full_day')
+                    ->label('Full Day')
                     ->required(),
             ]);
     }

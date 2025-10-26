@@ -14,9 +14,11 @@ class RoomsTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
                 TextColumn::make('code')
+                    ->label('Kode')
+                    ->searchable(),
+                TextColumn::make('name')
+                    ->label('Ruangan')
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()

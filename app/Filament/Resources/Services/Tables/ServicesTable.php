@@ -14,11 +14,14 @@ class ServicesTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
                 TextColumn::make('code')
+                    ->label('Kode')
+                    ->searchable(),
+                TextColumn::make('name')
+                    ->label('Pelayanan')
                     ->searchable(),
                 TextColumn::make('duration_minutes')
+                    ->label('Durasi (menit)')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')

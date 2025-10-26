@@ -14,6 +14,7 @@ class SettingForm
         return $schema
             ->components([
                 Select::make('key')
+                    ->native(false)
                     ->options(SettingKey::class)
                     ->required(),
                 Textarea::make('value')

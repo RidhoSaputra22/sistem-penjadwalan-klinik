@@ -16,23 +16,29 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nama')
                     ->required(),
                 TextInput::make('email')
                     ->label('Email address')
+                    ->native(false)
+                    ->unique(ignoreRecord: true)
                     ->email()
                     ->required(),
-                DateTimePicker::make('email_verified_at'),
-                TextInput::make('password')
-                    ->password()
-                    ->required(),
+                DateTimePicker::make('email_verified_at')
+                    ->native(false),
                 TextInput::make('phone')
+                    ->label('Nomor Telepon')
+                    ->required()
                     ->tel(),
                 Select::make('role')
+                    ->label('Role')
                     ->options(UserRole::class)
                     ->default('doctor')
                     ->required(),
-                TextInput::make('title'),
+                TextInput::make('title')
+                    ->label('Title'),
                 Textarea::make('notes')
+                    ->label('Catatan')
                     ->columnSpanFull(),
             ]);
     }

@@ -12,14 +12,19 @@ class ServiceForm
     {
         return $schema
             ->components([
+                TextInput::make('code')
+                    ->disabled()
+                    ->label('Kode'),
                 TextInput::make('name')
+                    ->label('Pelayanan')
                     ->required(),
-                TextInput::make('code'),
                 TextInput::make('duration_minutes')
+                    ->label('Durasi (menit)')
                     ->required()
                     ->numeric()
                     ->default(30),
                 Textarea::make('description')
+                    ->label('Deskripsi')
                     ->columnSpanFull(),
             ]);
     }

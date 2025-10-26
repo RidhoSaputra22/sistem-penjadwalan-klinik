@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\DoctorServices\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -11,12 +12,12 @@ class DoctorServiceForm
     {
         return $schema
             ->components([
-                TextInput::make('user_id')
+                Select::make('user_id')
                     ->required()
-                    ->numeric(),
-                TextInput::make('service_id')
+                    ->relationship('doctor', 'name'),
+                Select::make('service_id')
                     ->required()
-                    ->numeric(),
+                    ->relationship('service', 'name'),
                 TextInput::make('priority')
                     ->required()
                     ->numeric()

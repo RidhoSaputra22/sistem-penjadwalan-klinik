@@ -16,11 +16,14 @@ class HolidaysTable
         return $table
             ->columns([
                 TextColumn::make('date')
+                    ->label('Tanggal')
                     ->date()
                     ->sortable(),
                 TextColumn::make('name')
+                    ->label('Nama')
                     ->searchable(),
                 IconColumn::make('full_day')
+                    ->label('Full Day')
                     ->boolean(),
                 TextColumn::make('created_at')
                     ->dateTime()

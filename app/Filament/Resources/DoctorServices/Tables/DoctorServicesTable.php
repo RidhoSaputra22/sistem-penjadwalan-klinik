@@ -14,11 +14,9 @@ class DoctorServicesTable
     {
         return $table
             ->columns([
-                TextColumn::make('user_id')
-                    ->numeric()
+                TextColumn::make('doctor.name')
                     ->sortable(),
-                TextColumn::make('service_id')
-                    ->numeric()
+                TextColumn::make('service.name')
                     ->sortable(),
                 TextColumn::make('priority')
                     ->numeric()

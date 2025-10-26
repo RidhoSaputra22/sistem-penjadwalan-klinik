@@ -14,12 +14,18 @@ class PatientForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label('Nama')
                     ->required(),
-                TextInput::make('nik'),
-                DatePicker::make('birth_date'),
+                TextInput::make('nik')
+                    ->label('NIK'),
+                DatePicker::make('birth_date')
+                    ->native(false)
+                    ->label('Tanggal Lahir'),
                 TextInput::make('phone')
+                    ->label('Nomor Telepon')
                     ->tel(),
                 Textarea::make('address')
+                    ->label('Alamat')
                     ->columnSpanFull(),
             ]);
     }
