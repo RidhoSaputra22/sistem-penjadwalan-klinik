@@ -5,6 +5,7 @@ namespace App\Services;
 use Carbon\Carbon;
 use App\Models\Room;
 use App\Models\User;
+use App\Enums\UserRole;
 use App\Models\Holiday;
 use App\Models\Service;
 use App\Models\RrPointer;
@@ -184,7 +185,7 @@ class RoundRobinScheduler
     private function getAvailableDoctors(int $serviceId, int $weekday, Carbon $start, Carbon $end)
     {
         return User::query()
-            ->where('role', 'doctor')
+            ->where('role', UserRole::DOCTOR)
             ->whereHas('services', fn($q) => $q->where('services.id', $serviceId))
             ->whereHas('doctorAvailabilities', function ($q) use ($weekday, $start, $end) {
                 $q->where('weekday', $weekday)

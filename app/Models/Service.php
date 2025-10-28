@@ -22,9 +22,6 @@ class Service extends Model
         'color',
     ];
 
-
-
-
     protected static function booted()
     {
         static::creating(function ($service) {
@@ -39,6 +36,11 @@ class Service extends Model
         return $this->belongsToMany(User::class, 'doctor_services', 'service_id', 'user_id')
             ->withPivot('priority')
             ->withTimestamps();
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
     }
 
     public function rrPointer()

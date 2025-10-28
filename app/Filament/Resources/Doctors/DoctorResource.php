@@ -15,10 +15,12 @@ use App\Filament\Resources\Doctors\Pages\ListDoctors;
 use App\Filament\Resources\Doctors\Pages\CreateDoctor;
 use App\Filament\Resources\Doctors\Schemas\DoctorForm;
 use App\Filament\Resources\Doctors\Tables\DoctorsTable;
+use App\Filament\Resources\Doctors\RelationManagers\ServicesRelationManager;
+use App\Models\Doctor;
 
 class DoctorResource extends Resource
 {
-    protected static ?string $model = User::class;
+    protected static ?string $model = Doctor::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
     protected static string|\UnitEnum|null $navigationGroup = 'Dokter';
@@ -43,6 +45,7 @@ class DoctorResource extends Resource
     {
         return [
             //
+            ServicesRelationManager::class
         ];
     }
 
