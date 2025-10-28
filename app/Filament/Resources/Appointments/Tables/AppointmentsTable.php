@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources\Appointments\Tables;
 
+use Filament\Tables\Table;
+use Filament\Actions\EditAction;
+use Filament\Tables\Grouping\Group;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 
 class AppointmentsTable
 {
@@ -62,9 +63,7 @@ class AppointmentsTable
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->recordActions([
                 EditAction::make(),
             ])
@@ -72,6 +71,11 @@ class AppointmentsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->groups([
+                Group::make('status'),
+                Group::make('doctor.name'),
+                Group::make('service.name'),
             ]);
     }
 }

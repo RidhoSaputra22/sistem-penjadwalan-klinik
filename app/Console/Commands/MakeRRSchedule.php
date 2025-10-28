@@ -25,7 +25,7 @@ class MakeRRSchedule extends Command
                 $this->error('Unable to schedule appointment. No available doctor / holiday / conflicts.');
                 return 1;
             }
-            $this->info('Appointment created: ' . $appointment->code . ' Doctor ID: ' . $appointment->doctor_id);
+
             return 0;
         } catch (\Exception $e) {
             $this->error($e->getMessage());

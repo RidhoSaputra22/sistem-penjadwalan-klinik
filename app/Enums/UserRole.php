@@ -8,6 +8,7 @@ enum UserRole: string implements HasLabel
 {
     case DOCTOR = 'doctor';
     case RECEPTIONIST = 'receptionist';
+    case STAFF = 'staff';
     case ADMIN = 'admin';
 
     public function getLabel(): string
@@ -15,6 +16,7 @@ enum UserRole: string implements HasLabel
         return match ($this) {
             self::DOCTOR => 'Dokter',
             self::RECEPTIONIST => 'Resepsionis',
+            self::STAFF => 'Staff',
             self::ADMIN => 'Admin',
         };
     }

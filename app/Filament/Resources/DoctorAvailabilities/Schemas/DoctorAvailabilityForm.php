@@ -25,8 +25,12 @@ class DoctorAvailabilityForm
                     ->native(false)
                     ->required(),
                 TimePicker::make('start_time')
+                    ->native(false)
+                    ->default('08:00')
                     ->required(),
                 TimePicker::make('end_time')
+                    ->native(false)
+                    ->default('08:00')
                     ->required(),
                 Toggle::make('is_active')
                     ->required(),

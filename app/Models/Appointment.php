@@ -10,10 +10,14 @@ use App\Models\Service;
 use App\Helpers\CodeGenerator;
 use App\Enums\AppointmentStatus;
 use App\Helpers\AppointmentHelper;
+use Guava\Calendar\Contracts\Eventable;
 use Illuminate\Database\Eloquent\Model;
+use Guava\Calendar\Contracts\Resourceable;
+use Guava\Calendar\ValueObjects\CalendarEvent;
+use Guava\Calendar\ValueObjects\CalendarResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Appointment extends Model
+class Appointment extends Model implements Eventable, Resourceable
 {
     //
     use HasFactory;
@@ -38,6 +42,22 @@ class Appointment extends Model
                 $appointment->code = CodeGenerator::appointment();
             }
         });
+    }
+
+    public function toCalendarEvent(): CalendarEvent
+    {
+        return CalendarEvent::make($this)
+            ->title($this->doctor->name . ' - ' . $this->service->name)
+            ->start($this->scheduled_date)
+            ->end($this->scheduled_date)
+            ->backgroundColor($this->service->color ?? 'primary')
+            ->allDay();
+    }
+
+    public function toCalendarResource(): CalendarResource
+    {
+        return CalendarResource::make('my-unique-id')
+            ->title($this->name);
     }
 
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Enums\ColorEnum;
 use App\Models\Appointment;
 use App\Helpers\CodeGenerator;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,11 @@ class Service extends Model
         'code',
         'duration_minutes',
         'description',
+        'color',
     ];
+
+
+
 
     protected static function booted()
     {

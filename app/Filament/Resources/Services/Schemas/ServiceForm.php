@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\Services\Schemas;
 
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
+use App\Enums\ColorEnum;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ColorPicker;
 
 class ServiceForm
 {
@@ -26,6 +29,8 @@ class ServiceForm
                 Textarea::make('description')
                     ->label('Deskripsi')
                     ->columnSpanFull(),
+                ColorPicker::make('color')
+                    ->label('Warna')
             ]);
     }
 }
