@@ -11,6 +11,11 @@ new class extends Component {
     public string $q = '';
     public ?int $service = null;
 
+    public function mount(): void
+    {
+        $this->q = request()->query('q', '');
+    }
+
     public function selectService(?int $serviceId): void
     {
         $this->service = $serviceId;
@@ -21,23 +26,28 @@ new class extends Component {
         $popularServices = Service::query()
             ->withCount('doctors')
             ->orderByDesc('doctors_count')
-            ->limit(8)
+            ->limit(5)
             ->get();
 
         $doctors = Doctor::query()
-            ->with(['services' => fn ($q) => $q->orderBy('name')])
+            ->select('doctors.*')
+            ->join('users', 'users.id', '=', 'doctors.user_id')
+            ->with([
+                'user',
+                'services' => fn ($q) => $q->orderBy('name'),
+            ])
             ->when($this->service, function (Builder $q) {
                 $q->whereHas('services', fn (Builder $s) => $s->whereKey($this->service));
             })
             ->when($this->q !== '', function (Builder $q) {
                 $term = trim($this->q);
                 $q->where(function (Builder $inner) use ($term) {
-                    $inner->where('name', 'like', "%{$term}%")
-                        ->orWhere('title', 'like', "%{$term}%")
+                    $inner->where('users.name', 'like', "%{$term}%")
+                        ->orWhere('users.title', 'like', "%{$term}%")
                         ->orWhereHas('services', fn (Builder $s) => $s->where('name', 'like', "%{$term}%"));
                 });
             })
-            ->orderBy('name')
+            ->orderBy('users.name')
             ->limit(12)
             ->get();
 
@@ -97,10 +107,14 @@ new class extends Component {
             <div class="text-sm font-medium text-gray-500 shrink-0">Paling banyak dicari</div>
 
             <div class="flex flex-wrap gap-2">
+                <button wire:click="selectService(null)"
+                    class="{{ $service === null ? 'border-primary text-primary' : '' }} px-4 py-2 rounded-full border border-gray-200 bg-white text-sm text-gray-700 hover:border-primary hover:text-primary transition">
+                    Semua
+                </button>
                 @foreach ($popularServices as $serviceItem)
                     <button wire:click="selectService({{ $serviceItem->id }})"
                         class="{{ $serviceItem->id === $service ? 'border-primary text-primary' : '' }} px-4 py-2 rounded-full border border-gray-200 bg-white text-sm text-gray-700 hover:border-primary hover:text-primary transition">
-                        {{ $serviceItem->name }}
+                        {{ Str::limit($serviceItem->name, 20) }}
                     </button>
                 @endforeach
             </div>
@@ -114,7 +128,7 @@ new class extends Component {
                         $primaryService = $doctor->services->first();
                         $secondaryService = $doctor->services->skip(1)->first();
                     @endphp
-                    <a href="#"
+                    <a href="{{ route('guest.doctor.detail', ['slug' => $doctor->slug]) }}"
                         class="group rounded-xl border border-gray-200 bg-white hover:shadow-md transition overflow-hidden">
                         <div class="relative p-4">
                             <div class="absolute top-4 left-4">
@@ -125,31 +139,21 @@ new class extends Component {
                         </div>
                         <div class="px-4 pb-4 space-y-2">
                             <h3 class="font-semibold text-gray-900 leading-snug truncate">
-                                {{ $doctor->name }}
+                                {{ $doctor->user?->name }}
                             </h3>
 
-                            <div class="flex items-start gap-2 text-sm text-gray-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.5" class="size-5 mt-0.5 text-gray-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 21v-4.5m0 0a4.5 4.5 0 0 1 4.5-4.5H18a4.5 4.5 0 0 1 4.5 4.5V21m-10.5-4.5V12a4.5 4.5 0 0 0-4.5-4.5H6A4.5 4.5 0 0 0 1.5 12v9" />
-                                </svg>
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                @include('components.icons.kardiogram')
                                 <div class="min-w-0">
                                     <div class="truncate">
-                                        {{ $doctor->title ?: ($primaryService?->name ?: 'Dokter') }}
+                                        {{ ($primaryService?->name ?: 'Dokter') }}
                                     </div>
-                                    @if ($secondaryService)
-                                        <div class="truncate text-gray-500">{{ $secondaryService->name }}</div>
-                                    @endif
+
                                 </div>
                             </div>
 
                             <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                    stroke="currentColor" stroke-width="1.5" class="size-5 text-gray-500">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 21h18M5 21V7.5a1.5 1.5 0 0 1 1.5-1.5h11A1.5 1.5 0 0 1 19 7.5V21M9 10.5h.01M9 13.5h.01M9 16.5h.01M12 10.5h.01M12 13.5h.01M12 16.5h.01M15 10.5h.01M15 13.5h.01M15 16.5h.01" />
-                                </svg>
+                                @include('components.icons.clinic')
                                 <span class="truncate">Klinik Goaria</span>
                             </div>
                         </div>

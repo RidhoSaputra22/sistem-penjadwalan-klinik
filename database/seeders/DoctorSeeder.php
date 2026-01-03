@@ -15,8 +15,9 @@ class DoctorSeeder extends Seeder
     {
         //
         Doctor::factory()
-        ->count(10)
+        ->count(1)
         ->hasServices(3)
+        ->hasDoctorAvailabilities(5)
 
 
         ->create();
