@@ -16,18 +16,23 @@ class DoctorsTable
             ->columns([
                 //
                 TextColumn::make('name')
+                    ->label('Name')
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label('Email address')
+                    ->label('Email Address')
                     ->searchable(),
                 TextColumn::make('email_verified_at')
+                    ->label('Email Terverifikasi Pada')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('phone')
+                    ->label('Nomor Telepon')
                     ->searchable(),
                 TextColumn::make('role')
+                    ->label('Role')
                     ->badge(),
                 TextColumn::make('title')
+                    ->label('Title')
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()

@@ -1,4 +1,5 @@
-@import 'tailwindcss';
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -6,6 +7,33 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: "Inter";
+
+    --color-primary: #d32032;
+    --color-secondary: #d32032;
+}
+
+* {
+    /* outline: 1px solid red !important; */
+}
+
+.input-form {
+    label {
+        @apply font-light;
+    }
+    input {
+        @apply w-full px-3 py-2  border border-black bg-white  focus:shadow-md focus:outline-none;
+    }
+
+    select {
+        @apply w-full px-3 py-2  border border-black bg-white  focus:shadow-md focus:outline-none;
+    }
+
+    textarea {
+        @apply w-full px-3 py-2  border border-black bg-white  focus:shadow-md focus:outline-none resize-none;
+    }
+
+    button {
+        @apply w-full px-3 py-2 cursor-pointer hover:shadow-md focus:shadow-md focus:outline-none;
+    }
 }

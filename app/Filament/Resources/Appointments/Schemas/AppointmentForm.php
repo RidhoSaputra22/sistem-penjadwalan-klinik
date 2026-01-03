@@ -78,7 +78,7 @@ class AppointmentForm
                     ->preload(),
                 DatePicker::make('scheduled_date')
                     ->label('Tanggal')
-                    ->default(now())
+                    ->default(now()->addDays(1))
                     ->native(false)
                     ->minDate(now())
                     ->required(),

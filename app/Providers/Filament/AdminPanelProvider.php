@@ -19,6 +19,8 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Resources\Appointments\Widgets\AppointmentCalendarWidget;
+use App\Filament\Widgets\DashboardStats;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -46,8 +48,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                DashboardStats::class,
+                AppointmentCalendarWidget::class
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -62,7 +64,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->spa();
+            ]);
     }
 }

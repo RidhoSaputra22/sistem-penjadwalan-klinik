@@ -18,11 +18,11 @@ class ServiceResource extends Resource
 {
     protected static ?string $model = Service::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Plus;
-    protected static string|\UnitEnum|null $navigationGroup = 'Pelayanan';
-    protected static ?string $navigationLabel = 'Pelayanan';
-    protected static ?string $pluralModelLabel = 'Pelayanan';
-    protected static ?string $modelLabel = 'Pelayanan';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Sparkles;
+    protected static string|\UnitEnum|null $navigationGroup = 'Dokter';
+    protected static ?string $navigationLabel = 'Spesialisasi';
+    protected static ?string $pluralModelLabel = 'Spesialisasi';
+    protected static ?string $modelLabel = 'Spesialisasi';
 
     protected static ?string $recordTitleAttribute = 'name';
 
