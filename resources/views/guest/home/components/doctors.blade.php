@@ -32,9 +32,9 @@ new class extends Component
                 </svg>
 
             </span>
-            <input type="text" wire:keydown.enter="search($event.target.value)"
+            <input  wire:keydown.enter="search($event.target.value)"
                 class="w-full pl-10 px-3 py-2 rounded-lg border border-primary bg-white placeholder:text-primary focus:shadow-md focus:outline-none"
-                placeholder="Cari Dokter">
+                placeholder="Cari Dokter" autocomplete="off">
 
         </div>
 

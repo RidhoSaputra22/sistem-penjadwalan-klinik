@@ -74,10 +74,16 @@ new class extends Component {
         return;
     }
 
+    public function goToRegist(): void
+    {
+        $this->dispatch('open-auth-modal', tab: 'regist');
+    }
+
 
 }; ?>
 
-<div class=" rounded-2xl border border-gray-200 bg-white p-6 sticky top-24 overflow-hidden">
+<div class=" rounded-2xl border border-gray-200 bg-white p-6 sticky top-24 overflow-hidden"
+    wire:loading.class="opacity-50 pointer-events-none" wire:target="goToRegist">
     <div class="text-2xl font-semibold text-gray-900">Masuk ke Akun Anda</div>
     <div class="mt-2 text-sm text-gray-600">Masukkan Email dan Password Anda</div>
 
@@ -104,7 +110,7 @@ new class extends Component {
 
         <div class="text-xs text-gray-500">
             Belum punya akun?
-            <button>Daftar akun</button>
+            <button wire:click="goToRegist">Daftar akun</button>
         </div>
     </div>
 

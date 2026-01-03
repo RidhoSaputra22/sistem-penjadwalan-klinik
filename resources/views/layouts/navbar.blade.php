@@ -13,13 +13,13 @@
                 <ul class=" flex gap-5 items-center">
                     <li>
                         <a href="{{ route('guest.home.welcome') }}"
-                            class="hover:text-primary transition-all duration-300 ease-in-out {{ request()->routeIs('guest.home.welcome') ? 'text-primary font-semibold' : '' }}">
+                            class="hover:text-primary transition-all duration-300 ease-in-out {{ request()->routeIs('guest.home*') ? 'text-primary font-semibold' : '' }}">
                             Beranda
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('guest.doctor.search') }}"
-                            class="hover:text-primary transition-all duration-300 ease-in-out {{ request()->routeIs('guest.doctor.search') ? 'text-primary font-semibold' : '' }}">
+                            class="hover:text-primary transition-all duration-300 ease-in-out {{ request()->routeIs('guest.doctor*') ? 'text-primary font-semibold' : '' }}">
                             Cari Dokter
                         </a>
                     </li>
@@ -39,16 +39,19 @@
             </div>
             <div>
                 <ul class="flex gap-5">
+                    @auth
                     <li>
-                        <a href="#" class="hover:text-primary transition-all duration-300 ease-in-out">
-                            Daftar
-                        </a>
+
                     </li>
+                    @else
                     <li>
-                        <a href="#" class="hover:text-primary transition-all duration-300 ease-in-out">
+                        <button
+                            class="px-5 py-2 text-sm rounded-md bg-primary text-white font-medium hover:bg-primary/80 transition-all duration-300 ease-in-out"
+                            x-on:click="$dispatch('open-auth-modal', { tab: 'login' })">
                             Masuk
-                        </a>
+                        </button>
                     </li>
+                    @endauth
                 </ul>
             </div>
         </div>
