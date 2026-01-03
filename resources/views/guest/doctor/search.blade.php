@@ -51,7 +51,7 @@ new class extends Component {
     @livewire('layouts.navbar')
 
     {{-- Content --}}
-    <section class="max-w-7xl mx-auto px-6 lg:px-10 py-8 min-h-screen">
+    <section class="max-w-7xl mx-auto px-6 lg:px-10 py-8 ">
         {{-- Search Bar --}}
         <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
             <button type="button"
@@ -109,7 +109,7 @@ new class extends Component {
         </div>
 
         {{-- Results --}}
-        <div class="mt-8">
+        <div class="mt-8 min-h-screen">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse ($doctors as $doctor)
                     @php
