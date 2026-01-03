@@ -6,13 +6,14 @@ use App\Models\Doctor;
 use App\Models\Service;
 
 new class extends Component {
+
+
     public string $q = '';
     public ?int $service = null;
 
-    public function mount(): void
+    public function selectService(?int $serviceId): void
     {
-        $this->q = (string) request()->string('q');
-        $this->service = request()->integer('service') ?: null;
+        $this->service = $serviceId;
     }
 
     public function with(): array
@@ -64,7 +65,7 @@ new class extends Component {
                 </svg>
             </button>
 
-            <form method="GET" action="{{ route('guest.doctor.search') }}" class="flex-1">
+            <div  class="flex-1">
                 <div class="flex items-stretch">
                     <div class="relative flex-1">
                         <span class="absolute inset-y-0 left-3 flex items-center text-gray-500">
@@ -74,15 +75,12 @@ new class extends Component {
                                     d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                             </svg>
                         </span>
-                        <input type="text" name="q" value="{{ $q }}"
+                        <input type="text" wire:model.live.debounce.750="q"
                             class="w-full h-full pl-10 pr-3 py-2 rounded-l-lg border border-gray-200 bg-white placeholder:text-gray-400 focus:shadow-md focus:outline-none"
                             placeholder="Nama Dokter, Spesialis, atau Rumah Sakit">
-                        @if ($service)
-                            <input type="hidden" name="service" value="{{ $service }}">
-                        @endif
                     </div>
-                    <button type="submit"
-                        class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-r-lg bg-secondary text-white hover:shadow-md transition">
+                    <button type="submit" wire:click="$refresh()"
+                        class=" inline-flex items-center justify-center gap-2 px-5 py-2 rounded-r-lg bg-primary text-white hover:shadow-md transition">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-5">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -91,7 +89,7 @@ new class extends Component {
                         <span class="text-sm font-medium">Cari</span>
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
 
         {{-- Popular chips --}}
@@ -100,16 +98,16 @@ new class extends Component {
 
             <div class="flex flex-wrap gap-2">
                 @foreach ($popularServices as $serviceItem)
-                    <a href="{{ route('guest.doctor.search', array_filter(['q' => $q ?: null, 'service' => $serviceItem->id])) }}"
-                        class="px-4 py-2 rounded-full border border-gray-200 bg-white text-sm text-gray-700 hover:border-primary hover:text-primary transition">
+                    <button wire:click="selectService({{ $serviceItem->id }})"
+                        class="{{ $serviceItem->id === $service ? 'border-primary text-primary' : '' }} px-4 py-2 rounded-full border border-gray-200 bg-white text-sm text-gray-700 hover:border-primary hover:text-primary transition">
                         {{ $serviceItem->name }}
-                    </a>
+                    </button>
                 @endforeach
             </div>
         </div>
 
         {{-- Results --}}
-        <div class="mt-8 min-h-screen">
+        <div class="mt-8 min-h-screen" wire:loading.class="opacity-50 pointer-events-none">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse ($doctors as $doctor)
                     @php

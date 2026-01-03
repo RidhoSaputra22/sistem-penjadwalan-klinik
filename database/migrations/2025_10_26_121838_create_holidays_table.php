@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -19,31 +18,6 @@ return new class extends Migration
             $table->boolean('full_day')->default(true);
             $table->timestamps();
         });
-
-        // Seeder di dalam migrate
-        DB::table('holidays')->insert([
-            [
-                'date' => '2025-01-01',
-                'name' => 'Tahun Baru Masehi',
-                'full_day' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'date' => '2025-03-31',
-                'name' => 'Hari Raya Nyepi',
-                'full_day' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'date' => '2025-04-18',
-                'name' => 'Wafat Isa Almasih',
-                'full_day' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
     }
 
     /**

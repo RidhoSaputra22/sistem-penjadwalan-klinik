@@ -1,3 +1,18 @@
+<?php
+
+use Livewire\Volt\Component;
+
+new class extends Component
+{
+    public function with(){
+        return [
+            'doctors' => \App\Models\Doctor::take(5)->get(),
+        ];
+    }
+};
+
+?>
+
 <section class="max-w-7xl  flex mx-auto py-24 px-10 gap-14">
     <div class="flex-1 space-y-5">
         <h1 class="text-2xl/tight font-medium" data-aos="fade-up">Dokter - Dokter Kami</h1>
@@ -19,30 +34,40 @@
         </div>
 
     </div>
-    <div class="swiper doctorSwiper h-96 flex-2  " data-aos="fade-up">
+    <div class="swiper doctorSwiper h-96 flex-2 " data-aos="fade-up">
         <div class="swiper-wrapper ">
-            @foreach ([1, 2, 3] as $doctor)
-            <a href="#" class="swiper-slide">
-                <div class="relative">
-                    <img src="{{ asset('images/doctor-placeholder.jpg') }}" alt=""
-                        class="rounded-xl w-full h-60 object-cover">
-                    <div class="absolute top-2 left-2 bg-primary px-3 py-1 rounded-md text-sm font-medium text-white">
-                        Dokter Umum
+            @foreach ($doctors as $doctor)
+            <a href="#"
+                class="swiper-slide group rounded-xl border border-gray-200 bg-white hover:shadow-md transition overflow-hidden">
+                <div class="relative p-4">
+                    <div class="absolute top-4 left-4">
+                        <img src="{{ asset('images/logo.jpg') }}" alt="" class="w-7 h-7 rounded-sm">
                     </div>
+                    <img src="{{ asset('images/doctor-placeholder.jpg') }}" alt=""
+                        class="h-52 w-full  object-cover  rounded-lg bg-gray-50">
                 </div>
-                <div class="mt-4 space-y-2">
-                    <h1 class="text-xl font-light text-overflow-ellipsis truncate uppercase">
-                        Dr Andi Salikin S.Kes
-                    </h1>
-                    <div class="flex gap-2 text-primary items-center text-lg font-light ">
-                        @include('components.icons.kardiogram', [
-                        'size' => 'size-6',
-                        ])
-                        <h1 class="">
-                            Sp. Dental Care
-                        </h1>
+                <div class="px-4 pb-4 space-y-2">
+                    <h3 class="font-semibold text-gray-800 leading-snug truncate">
+                        {{ $doctor->user->name }}
+                    </h3>
 
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        @include('components.icons.kardiogram')
+                        <div class="min-w-0">
+                            <div class="truncate">
+                                Sp. {{ $doctor->specialization }}
+                            </div>
 
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" class="size-5 text-gray-500">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 21h18M5 21V7.5a1.5 1.5 0 0 1 1.5-1.5h11A1.5 1.5 0 0 1 19 7.5V21M9 10.5h.01M9 13.5h.01M9 16.5h.01M12 10.5h.01M12 13.5h.01M12 16.5h.01M15 10.5h.01M15 13.5h.01M15 16.5h.01" />
+                        </svg>
+                        <span class="truncate">Klinik Goaria</span>
                     </div>
                 </div>
             </a>
@@ -60,7 +85,7 @@
 @push('scripts')
 <script>
 const doctorSwiper = new Swiper(".doctorSwiper", {
-    slidesPerView: 2,
+    slidesPerView: 2.5,
     // centeredSlides: true,
     loop: true,
     speed: 400,
