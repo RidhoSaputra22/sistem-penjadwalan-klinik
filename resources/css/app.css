@@ -8,32 +8,87 @@
 
 @theme {
     --font-sans: "Inter";
+    --font-poppins: "Poppins", sans-serif;
 
     --color-primary: #d32032;
-    --color-secondary: #d32032;
+    --color-secondary: #339703;
 }
 
-* {
-    /* outline: 1px solid red !important; */
+.outline-debugger * {
+    outline: 1px solid red !important;
+}
+
+button {
+    cursor: pointer;
 }
 
 .input-form {
+
     label {
-        @apply font-light;
-    }
-    input {
-        @apply w-full px-3 py-2  border border-black bg-white  focus:shadow-md focus:outline-none;
+        @apply font-light ;
     }
 
-    select {
-        @apply w-full px-3 py-2  border border-black bg-white  focus:shadow-md focus:outline-none;
+    input {
+        @apply w-full px-3 py-2 mt-2 rounded-md border border-gray-300 bg-white  focus:shadow-md focus:outline-none;
     }
+
+   select {
+        @apply w-full px-3 py-2 rounded-sm bg-white border border-gray-300;
+
+        /* hilangkan arrow bawaan */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+
+        /* kasih ruang untuk arrow custom */
+        padding-right: 2.5rem;
+
+        /* arrow custom + posisinya (biar nggak mepet) */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M6 8l4 4 4-4' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center; /* atur jarak dari kanan di sini */
+        background-size: 1rem 1rem;
+    }
+
+    /* IE/old Edge */
+    select::-ms-expand {
+        display: none;
+    }
+
 
     textarea {
-        @apply w-full px-3 py-2  border border-black bg-white  focus:shadow-md focus:outline-none resize-none;
+        @apply w-full px-3 py-2  border border-gray-300 bg-white  focus:shadow-md focus:outline-none resize-none;
     }
 
     button {
         @apply w-full px-3 py-2 cursor-pointer hover:shadow-md focus:shadow-md focus:outline-none;
     }
+}
+
+
+/* SWIPER */
+
+.swiper-pagination-bullet {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.swiper-pagination-bullet-active {
+    background-color: #ffffff !important;
+}
+
+
+/* Force FullCalendar Light Mode */
+.fc {
+    --fc-page-bg-color: #ffffff;
+    --fc-neutral-bg-color: #ffffff;
+    --fc-border-color: #e5e7eb;
+    --fc-button-bg-color: #ffffff;
+    --fc-button-border-color: #d1d5db;
+    --fc-button-text-color: #374151;
+    --fc-button-hover-bg-color: #f3f4f6;
+    --fc-button-active-bg-color: #e5e7eb;
+    --fc-event-bg-color: #3b82f6;
+    --fc-event-border-color: #3b82f6;
+    --fc-event-text-color: #ffffff;
+    color-scheme: light;
 }
