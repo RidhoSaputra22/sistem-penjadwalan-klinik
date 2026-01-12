@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Room;
 use App\Models\User;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Database\Seeders\DoctorSeeder;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +26,22 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => Hash::make('admin'),
         ]);
+
+        User::factory()->create([
+            'name' => 'User',
+            'email' => 'user@gmail.com',
+            'password' => Hash::make('user'),
+        ]);
+
+        Category::factory()
+        ->count(5)
+        ->hasServices(4)
+
+        ->create();
+
+        Room::factory()
+        ->count(5)
+        ->create();
 
         $this->call(DoctorSeeder::class);
     }

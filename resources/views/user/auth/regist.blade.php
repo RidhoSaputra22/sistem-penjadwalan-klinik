@@ -2,6 +2,7 @@
 
 use App\Models\User;
 
+use App\Enums\UserRole;
 use Illuminate\Support\Str;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\DB;
@@ -79,6 +80,7 @@ new class extends Component {
                 'email' => $validated['email'],
                 'phone' => $validated['phone'], // pastikan kolom "phone" ada di tabel users
                 'password' => Hash::make($validated['password']),
+                'role' => UserRole::PATIENT->value,
             ]);
 
             event(new Registered($user));

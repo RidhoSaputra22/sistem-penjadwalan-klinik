@@ -15,7 +15,7 @@ new class extends Component {
 
         $validated = $this->validate([
             'email' => ['required', 'email'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string'],
         ], [
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
@@ -43,12 +43,7 @@ new class extends Component {
             \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 60);
 
             // Jangan bocorkan apakah email terdaftar atau tidak
-            $this->dispatch(
-            'open-alert',
-            type: 'error',
-            message: 'Login gagal!',
-            description: 'Email atau password tidak valid.'
-            );
+            $this->addError('email', 'Email atau password salah.');
 
             $this->password = '';
             return;

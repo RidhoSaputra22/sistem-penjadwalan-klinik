@@ -10,6 +10,9 @@ enum UserRole: string implements HasLabel
     case RECEPTIONIST = 'receptionist';
     case STAFF = 'staff';
     case ADMIN = 'admin';
+    case PATIENT = 'patient';
+
+
 
     public function getLabel(): string
     {
@@ -18,6 +21,7 @@ enum UserRole: string implements HasLabel
             self::RECEPTIONIST => 'Resepsionis',
             self::STAFF => 'Staff',
             self::ADMIN => 'Admin',
+            self::PATIENT => 'Pasien',
         };
     }
 }

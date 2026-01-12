@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -57,6 +58,20 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted()
+    {
+        static::created(function ($user) {
+
+            Patient::create([
+                'user_id' => $user->id,
+                'medical_record_number' => null,
+                'nik' => null,
+                'birth_date' => null,
+                'address' => null,
+            ]);
+        });
+    }
+
     // === Relasi ===
     public function services(): BelongsToMany
     {
@@ -71,5 +86,10 @@ class User extends Authenticatable
     public function doctorAvailabilities(): HasMany
     {
         return $this->hasMany(DoctorAvailability::class);
+    }
+
+    public function patient(): HasOne
+    {
+        return $this->hasOne(Patient::class, 'user_id');
     }
 }

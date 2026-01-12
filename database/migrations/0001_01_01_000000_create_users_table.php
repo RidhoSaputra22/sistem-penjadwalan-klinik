@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('phone')->nullable();
-            $table->enum('role', ['doctor', 'receptionist', 'admin'])->default('doctor');
+            $table->string('role')->default('patient');
             $table->string('title')->nullable(); // dr., Sp.KJ, etc.
             $table->text('notes')->nullable();
             $table->rememberToken();

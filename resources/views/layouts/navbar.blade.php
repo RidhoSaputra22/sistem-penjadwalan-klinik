@@ -24,8 +24,8 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#"
-                            class="hover:text-primary transition-all duration-300 ease-in-out {{ request()->routeIs('guest.services.index') ? 'text-primary font-semibold' : '' }}">
+                        <a href="{{ route('guest.service.search') }}"
+                            class="hover:text-primary transition-all duration-300 ease-in-out {{ request()->routeIs('guest.service.search') ? 'text-primary font-semibold' : '' }}">
                             Layanan Kami
                         </a>
                     </li>
@@ -47,7 +47,7 @@
                     <li>
                         <button
                             class="px-5 py-2 text-sm rounded-md bg-primary text-white font-medium hover:bg-primary/80 transition-all duration-300 ease-in-out"
-                            x-on:click="$dispatch('open-auth-modal', { tab: 'login' })">
+                            x-on:click="$dispatch('open-auth-modal', { tab: 'login' })" >
                             Masuk
                         </button>
                     </li>

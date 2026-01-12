@@ -10,6 +10,9 @@ Volt::route('/', 'guest.home.welcome')->name('guest.home.welcome');
 Volt::route('/cari-dokter', 'guest.doctor.search')->name('guest.doctor.search');
 Volt::route('/detail-dokter/{slug}', 'guest.doctor.detail')->name('guest.doctor.detail');
 
+Volt::route('/cari-layanan', 'guest.service.search')->name('guest.service.search');
+Volt::route('/booking/{slug}', 'guest.booking.booking')->name('guest.booking');
+
 
 Volt::route('/services', 'guest.services.index')->name('guest.services.index');
 Volt::route('/about', 'guest.about.index')->name('guest.about.index');

@@ -8,6 +8,8 @@ use App\Models\Appointment;
 use App\Helpers\CodeGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Service extends Model
 {
@@ -15,18 +17,40 @@ class Service extends Model
     use HasFactory;
 
     protected $fillable = [
+        'category_id',
         'name',
+        'slug',
         'code',
         'duration_minutes',
+        'price',
         'description',
+        'photo',
         'color',
+    ];
+
+    protected $casts = [
+        'duration_minutes' => 'integer',
+        'price' => 'integer',
     ];
 
     protected static function booted()
     {
-        static::creating(function ($service) {
+        static::creating(function (self $service) {
             if (empty($service->code)) {
                 $service->code = CodeGenerator::service();
+            }
+
+            if (empty($service->slug)) {
+                $base = Str::slug($service->name ?? 'service');
+                $slug = $base;
+                $i = 2;
+
+                while (static::query()->where('slug', $slug)->exists()) {
+                    $slug = $base . '-' . $i;
+                    $i++;
+                }
+
+                $service->slug = $slug;
             }
         });
     }
@@ -36,6 +60,11 @@ class Service extends Model
         return $this->belongsToMany(User::class, 'doctor_services', 'service_id', 'user_id')
             ->withPivot('priority')
             ->withTimestamps();
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function users()

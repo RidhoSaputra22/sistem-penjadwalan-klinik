@@ -13,6 +13,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DetachBulkAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -30,6 +31,12 @@ class ServicesRelationManager extends RelationManager
                 TextInput::make('code')
                     ->disabled()
                     ->label('Kode'),
+                Select::make('category_id')
+                    ->label('Kategori')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 TextInput::make('name')
                     ->label('Pelayanan')
                     ->required(),
@@ -38,9 +45,20 @@ class ServicesRelationManager extends RelationManager
                     ->required()
                     ->numeric()
                     ->default(30),
+                TextInput::make('price')
+                    ->label('Harga')
+                    ->required()
+                    ->numeric()
+                    ->minValue(0)
+                    ->default(0),
                 Textarea::make('description')
                     ->label('Deskripsi')
                     ->columnSpanFull(),
+                FileUpload::make('photo')
+                    ->label('Foto')
+                    ->disk('public')
+                    ->directory('services')
+                    ->image(),
                 ColorPicker::make('color')
                     ->label('Warna')
                     ->required()
