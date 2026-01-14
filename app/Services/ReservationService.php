@@ -48,6 +48,7 @@ class ReservationService
         int $durationMinutes,
         ?int $roomId = null,
         ?int $doctorId = null,
+        ?int $excludeAppointmentId = null,
     ): array {
         if (empty($date)) {
             return [];
@@ -82,6 +83,7 @@ class ReservationService
             ->whereDate('scheduled_date', $date)
             ->whereNotNull('scheduled_date')
             ->where('status', '!=', AppointmentStatus::CANCELLED->value)
+            ->when($excludeAppointmentId !== null, fn ($q) => $q->where('id', '!=', $excludeAppointmentId))
             ->when($roomId !== null, fn ($q) => $q->where('room_id', $roomId))
             ->when($doctorId !== null, fn ($q) => $q->where('doctor_id', $doctorId))
             ->with('service');
@@ -351,6 +353,225 @@ class ReservationService
             'ok' => true,
             'status' => 200,
             'message' => 'Payment pending',
+            'booking' => $booking,
+        ];
+    }
+
+    /**
+     * User action: reschedule booking (appointment) by owner.
+     *
+     * @return array{ok: bool, status: int, message: string, booking: ?Appointment}
+     */
+    public function rescheduleBookingByUser(int $bookingId, int $userId, string $newScheduledAt): array
+    {
+        $tz = 'Asia/Makassar';
+
+        try {
+            $scheduledAt = Carbon::parse($newScheduledAt, $tz);
+        } catch (\Throwable) {
+            return [
+                'ok' => false,
+                'status' => 400,
+                'message' => 'Tanggal / jam tidak valid.',
+                'booking' => null,
+            ];
+        }
+
+        $booking = Appointment::query()
+            ->with(['patient.user', 'service'])
+            ->find($bookingId);
+
+        if (! $booking) {
+            return [
+                'ok' => false,
+                'status' => 404,
+                'message' => 'Booking tidak ditemukan.',
+                'booking' => null,
+            ];
+        }
+
+        $ownerUserId = (int) ($booking->patient?->user_id ?? 0);
+        if ($ownerUserId !== (int) $userId) {
+            return [
+                'ok' => false,
+                'status' => 403,
+                'message' => 'Anda tidak berhak mengubah booking ini.',
+                'booking' => $booking,
+            ];
+        }
+
+        if (in_array($booking->status?->value, [AppointmentStatus::CANCELLED->value, AppointmentStatus::DONE->value], true)) {
+            return [
+                'ok' => false,
+                'status' => 422,
+                'message' => 'Booking sudah selesai atau dibatalkan dan tidak bisa dijadwal ulang.',
+                'booking' => $booking,
+            ];
+        }
+
+        if ($booking->status?->value === AppointmentStatus::ONGOING->value) {
+            return [
+                'ok' => false,
+                'status' => 422,
+                'message' => 'Booking sedang berlangsung dan tidak bisa dijadwal ulang.',
+                'booking' => $booking,
+            ];
+        }
+
+        if (Holiday::query()->whereDate('date', $scheduledAt->toDateString())->exists()) {
+            return [
+                'ok' => false,
+                'status' => 422,
+                'message' => 'Tanggal tersebut adalah hari libur. Silakan pilih tanggal lain.',
+                'booking' => $booking,
+            ];
+        }
+
+        $durationMinutes = (int) ($booking->service?->duration_minutes ?? 60);
+        $date = $scheduledAt->toDateString();
+        $time = $scheduledAt->format('H:i');
+
+        $slots = self::getAvailableTimeSlots(
+            date: $date,
+            durationMinutes: $durationMinutes,
+            excludeAppointmentId: (int) $booking->id,
+        );
+
+        $slot = collect($slots)->first(fn (array $s) => ($s['time'] ?? null) === $time);
+        if (! $slot || ! ($slot['available'] ?? false)) {
+            return [
+                'ok' => false,
+                'status' => 422,
+                'message' => 'Jam yang dipilih sudah tidak tersedia. Silakan pilih jam lain.',
+                'booking' => $booking,
+            ];
+        }
+
+        $assignment = $this->findAvailableAssignment(
+            scheduledDate: $scheduledAt,
+            durationMinutes: $durationMinutes,
+            excludeAppointmentId: (int) $booking->id,
+        );
+
+        if (! $assignment) {
+            return [
+                'ok' => false,
+                'status' => 422,
+                'message' => 'Tidak ada dokter/ruangan yang tersedia pada jam tersebut.',
+                'booking' => $booking,
+            ];
+        }
+
+        $booking->update([
+            'doctor_id' => $assignment['doctor_id'],
+            'room_id' => $assignment['room_id'],
+            'scheduled_date' => $assignment['scheduled_date'],
+            'scheduled_start' => $assignment['scheduled_start'],
+            'scheduled_end' => $assignment['scheduled_end'],
+            // status tidak diubah (tetap pending/confirmed sesuai kondisi sebelumnya)
+        ]);
+
+        $booking->refresh()->loadMissing(['patient.user', 'doctor', 'room', 'service']);
+
+        $formatted = Carbon::parse($assignment['scheduled_date'] . ' ' . $assignment['scheduled_start'], $tz)
+            ->format('d-m-Y H:i');
+
+        $booking->patient?->user?->notify(new GenericDatabaseNotification(
+            message: "Jadwal appointment {$booking->code} berhasil diubah ke {$formatted}.",
+            kind: NotificationType::BookingCreated->value,
+            extra: [
+                'booking_id' => $booking->id,
+                'code' => $booking->code,
+            ],
+        ));
+
+        $booking->doctor?->notify(new GenericDatabaseNotification(
+            message: "Jadwal appointment {$booking->code} telah diubah ke {$formatted}.",
+            kind: NotificationType::BookingCreated->value,
+            extra: [
+                'booking_id' => $booking->id,
+                'code' => $booking->code,
+            ],
+        ));
+
+        return [
+            'ok' => true,
+            'status' => 200,
+            'message' => 'Reschedule berhasil.',
+            'booking' => $booking,
+        ];
+    }
+
+    /**
+     * User action: cancel booking (appointment) by owner.
+     *
+     * @return array{ok: bool, status: int, message: string, booking: ?Appointment}
+     */
+    public function cancelBookingByUser(int $bookingId, int $userId): array
+    {
+        $booking = Appointment::query()
+            ->with(['patient.user', 'doctor'])
+            ->find($bookingId);
+
+        if (! $booking) {
+            return [
+                'ok' => false,
+                'status' => 404,
+                'message' => 'Booking tidak ditemukan.',
+                'booking' => null,
+            ];
+        }
+
+        $ownerUserId = (int) ($booking->patient?->user_id ?? 0);
+        if ($ownerUserId !== (int) $userId) {
+            return [
+                'ok' => false,
+                'status' => 403,
+                'message' => 'Anda tidak berhak membatalkan booking ini.',
+                'booking' => $booking,
+            ];
+        }
+
+        if ($booking->status?->value === AppointmentStatus::CANCELLED->value) {
+            return [
+                'ok' => true,
+                'status' => 200,
+                'message' => 'Booking sudah dibatalkan.',
+                'booking' => $booking,
+            ];
+        }
+
+        if (in_array($booking->status?->value, [AppointmentStatus::ONGOING->value, AppointmentStatus::DONE->value], true)) {
+            return [
+                'ok' => false,
+                'status' => 422,
+                'message' => 'Booking yang sedang berlangsung / selesai tidak bisa dibatalkan.',
+                'booking' => $booking,
+            ];
+        }
+
+        $booking->update([
+            'status' => AppointmentStatus::CANCELLED,
+        ]);
+
+        $booking->refresh()->loadMissing(['patient.user', 'doctor']);
+
+        $booking->patient?->user?->notify(new GenericDatabaseNotification(
+            message: 'Booking Anda berhasil dibatalkan.',
+            kind: NotificationType::Cancelled->value,
+            extra: ['booking_id' => $booking->id, 'code' => $booking->code],
+        ));
+
+        $booking->doctor?->notify(new GenericDatabaseNotification(
+            message: "Appointment {$booking->code} telah dibatalkan oleh pasien.",
+            kind: NotificationType::Cancelled->value,
+            extra: ['booking_id' => $booking->id, 'code' => $booking->code],
+        ));
+
+        return [
+            'ok' => true,
+            'status' => 200,
+            'message' => 'Booking dibatalkan.',
             'booking' => $booking,
         ];
     }

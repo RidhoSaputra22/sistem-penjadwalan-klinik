@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Booking;
-use App\Enums\BookingStatus;
+use App\Enums\AppointmentStatus;
+use App\Models\Appointment;
 use App\Services\ReservationService;
 use Carbon\Carbon;
 use Livewire\Volt\Component;
@@ -38,7 +38,7 @@ new class extends Component {
         $this->isRescheduleOpen = false;
         $this->rescheduleBookingId = null;
         $this->reset(['reschedule_date', 'reschedule_time']);
-        $this->dispatch('reset-booking-calendar');
+        // $this->dispatch('reset-booking-calendar');
     }
 
     public function applyReschedule(): void
@@ -116,18 +116,18 @@ new class extends Component {
 
     public function with(): array
     {
-        $userId = Auth::id();
+        $patientId = Auth::user()->patient?->id ?? null;
 
-        if (!$userId) {
+        if (!$patientId) {
             $this->redirectRoute('user.login');
             return [];
         }
 
-        $availableBookingStatus = BookingStatus::asArray();
+        $availableBookingStatus = AppointmentStatus::asArray();
 
-        $bookings = Booking::query()
-            ->with(['package', 'photographer', 'studio'])
-            ->where('user_id', $userId)
+        $bookings = Appointment::query()
+            ->with(['service', 'doctor', 'room'])
+            ->where('patient_id', $patientId)
             ->when($this->selectedBookingStatus && $this->selectedBookingStatus !== 'all', function ($query) {
                 $query->where('status', $this->selectedBookingStatus);
             })
@@ -136,9 +136,9 @@ new class extends Component {
 
         $activeRescheduleBooking = null;
         if ($this->rescheduleBookingId) {
-            $activeRescheduleBooking = Booking::query()
-                ->with(['package'])
-                ->where('user_id', $userId)
+            $activeRescheduleBooking = Appointment::query()
+                ->with(['service'])
+                ->where('patient_id', $patientId)
                 ->find($this->rescheduleBookingId);
         }
 
@@ -191,10 +191,10 @@ new class extends Component {
             <thead>
                 <tr class="text-left border-b">
                     <th class="py-3 pr-4">Kode Booking</th>
-                    <th class="py-3 pr-4">Paket</th>
+                    <th class="py-3 pr-4">Layanan</th>
                     <th class="py-3 pr-4">Jadwal</th>
-                    <th class="py-3 pr-4">Studio</th>
-                    <th class="py-3 pr-4">Fotografer</th>
+                    <th class="py-3 pr-4">Ruangan</th>
+                    <th class="py-3 pr-4">Dokter</th>
                     <th class="py-3 pr-4">Status</th>
                     <th class="py-3">Aksi</th>
                 </tr>
@@ -203,10 +203,19 @@ new class extends Component {
                 @forelse ($bookings as $booking)
                 <tr class="border-b">
                     <td class="py-3 pr-4 font-medium">{{ $booking->code ?? '-' }}</td>
-                    <td class="py-3 pr-4">{{ $booking->package?->name ?? '-' }}</td>
-                    <td class="py-3 pr-4">{{ optional($booking->scheduled_at)->format('d M Y H:i') ?? '-' }}</td>
-                    <td class="py-3 pr-4">{{ $booking->studio?->name ?? '-' }}</td>
-                    <td class="py-3 pr-4">{{ $booking->photographer?->name ?? '-' }}</td>
+                    <td class="py-3 pr-4">{{ $booking->service?->name ?? '-' }}</td>
+                    <td class="py-3 pr-4">
+                        @php
+                            $scheduledLabel = '-';
+                            if ($booking->scheduled_date && $booking->scheduled_start) {
+                                $scheduledLabel = Carbon::parse($booking->scheduled_date->toDateString() . ' ' . $booking->scheduled_start, 'Asia/Makassar')
+                                    ->format('d M Y H:i');
+                            }
+                        @endphp
+                        {{ $scheduledLabel }}
+                    </td>
+                    <td class="py-3 pr-4">{{ $booking->room?->name ?? '-' }}</td>
+                    <td class="py-3 pr-4">{{ $booking->doctor?->name ?? '-' }}</td>
                     <td class="py-3 pr-4">
                         @php
                             $status = $booking->status;
@@ -214,7 +223,8 @@ new class extends Component {
                             $color = match ($status?->value) {
                                 'pending' => 'bg-amber-100 text-amber-700',
                                 'confirmed' => 'bg-blue-100 text-blue-700',
-                                'completed' => 'bg-green-100 text-green-700',
+                                'ongoing' => 'bg-yellow-100 text-yellow-700',
+                                'done' => 'bg-green-100 text-green-700',
                                 'cancelled' => 'bg-red-100 text-red-700',
                                 default => 'bg-gray-100 text-gray-700',
                             };
@@ -245,7 +255,7 @@ new class extends Component {
 
                 @empty
                 <tr>
-                    <td colspan="6" class="py-6 text-center text-gray-500">Belum ada riwayat pesanan.</td>
+                    <td colspan="7" class="py-6 text-center text-gray-500">Belum ada riwayat pesanan.</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -257,21 +267,22 @@ new class extends Component {
     </div>
 
     @if ($isRescheduleOpen && $activeRescheduleBooking)
-        @component('components.modal', [
+        <div x-data="{isOpen: @entangle('isRescheduleOpen')}" x-show="isOpen" x-cloak>
+             @component('components.modal', [
             'maxWidth' => 'max-w-4xl',
         ])
             @slot('title')
                 Jadwal Ulang Booking {{ $activeRescheduleBooking->code ?? '' }}
             @endslot
 
-            <div class="space-y-4">
+            <div class="space-y-4 p-6">
                 <div class="text-sm text-gray-600">
                     Pilih tanggal & jam baru, lalu klik simpan.
                 </div>
 
                 @livewire('guest.booking.components.booking-callendar', [
-                    'package' => $activeRescheduleBooking->package,
-                    'excludeBookingId' => $activeRescheduleBooking->id,
+                    'service' => $activeRescheduleBooking->service,
+                    'excludeAppointmentId' => $activeRescheduleBooking->id,
                 ])
 
                 @if ($errors->has('reschedule_date') || $errors->has('reschedule_time'))
@@ -288,5 +299,6 @@ new class extends Component {
                 </div>
             </div>
         @endcomponent
+        </div>
     @endif
 </div>

@@ -34,4 +34,15 @@ enum AppointmentStatus: string implements HasLabel, HasColor
             self::CANCELLED => 'red',
         };
     }
+
+      public static function asArray(): array
+    {
+        return array_map(
+            fn (self $status) => [
+                'value' => $status->value,
+                'label' => $status->getLabel(),
+            ],
+            self::cases(),
+        );
+    }
 }

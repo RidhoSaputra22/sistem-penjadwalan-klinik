@@ -12,6 +12,8 @@ new class extends Component
 
     public Service $service;
 
+    public ?int $excludeAppointmentId = null;
+
     protected $listeners = [
         'select-date' => 'selectDate',
         'reset-booking-calendar' => 'resetBookingCalendar',
@@ -73,6 +75,7 @@ new class extends Component
     {
         $events = Appointment::query()
             ->with(['patient', 'service'])
+            ->when($this->excludeAppointmentId !== null, fn ($q) => $q->where('id', '!=', $this->excludeAppointmentId))
             ->get()
             ->map(function (Appointment $appointment) {
                 $date = Carbon::parse((string) $appointment->scheduled_date)->toDateString();
@@ -89,6 +92,8 @@ new class extends Component
         $availableSlotTime = ReservationService::getAvailableTimeSlots(
             date: $this->selectedDate ?? now()->format('Y-m-d'),
             durationMinutes: $this->service->duration_minutes,
+
+            excludeAppointmentId: $this->excludeAppointmentId,
 
         );
 

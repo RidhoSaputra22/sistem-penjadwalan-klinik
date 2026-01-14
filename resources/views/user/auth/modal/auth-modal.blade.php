@@ -30,7 +30,7 @@ new class extends Component {
         $this->tab = $tab;
     }
 
-    #[On('modal-closed')]
+    #[On('closed-auth-modal')]
     public function onModalClosed(string $name): void
     {
         if ($name !== 'auth-modal') {
