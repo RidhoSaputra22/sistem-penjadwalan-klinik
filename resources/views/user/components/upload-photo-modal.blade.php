@@ -102,7 +102,7 @@ new class extends Component {
         x-on:livewire-upload-start="uploading = true; finished = false; progress = 0"
         x-on:livewire-upload-progress="progress = $event.detail.progress"
         x-on:livewire-upload-finish="uploading = false; finished = true"
-        x-on:livewire-upload-error="uploading = false; finished = false">
+        x-on:livewire-upload-error="uploading = false; finished = false" class="p-6">
         <style>
         @keyframes pop {
             0% {

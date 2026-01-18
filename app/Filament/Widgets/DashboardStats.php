@@ -7,6 +7,7 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use App\Enums\AppointmentStatus;
 
 class DashboardStats extends StatsOverviewWidget
 {
@@ -14,7 +15,7 @@ class DashboardStats extends StatsOverviewWidget
     {
         return [
             //
-            Stat::make('Appointments', Appointment::where('created_at', '>=', now()->subDay())->count())
+            Stat::make('Appointments', Appointment::where('created_at', '>=', now()->subDay())->where('status', AppointmentStatus::CONFIRMED)->count())
                 ->icon('heroicon-o-calendar')
                 ->color('primary')
                 ->label('Total reservasi hari ini')

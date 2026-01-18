@@ -41,6 +41,15 @@ new class extends Component {
     #[On('payment-error')]
     public function handlePaymentError($payload)
     {
+        // dd($payload);
+        $snapToken = $payload['snapToken'] ?? null;
+
+        $booking = App\Models\Appointment::where('snap_token', $snapToken)->first();
+        if ($booking) {
+            $booking->status = \App\Enums\AppointmentStatus::CANCELLED;
+            $booking->save();
+        }
+
         $this->dispatch('open-alert', 'error', 'Pembayaran Gagal', 'Terjadi kesalahan pada proses pembayaran. Silakan coba lagi atau hubungi layanan pelanggan.');
     }
 

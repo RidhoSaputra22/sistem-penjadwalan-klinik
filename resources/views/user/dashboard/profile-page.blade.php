@@ -13,7 +13,7 @@ new class extends Component {
 
     public string $name = '';
     public string $email = '';
-    public string $hp = '';
+    public string $phone = '';
 
     public ?string $photo = null;
     public $photoUpload;
@@ -34,7 +34,7 @@ new class extends Component {
 
         $this->name = (string) $user->name;
         $this->email = (string) $user->email;
-        $this->hp = (string) $user->hp;
+        $this->phone = (string) $user->phone;
         $this->photo = $user->photo;
     }
 
@@ -113,7 +113,7 @@ new class extends Component {
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
-            'hp' => ['required', 'string', 'max:255', Rule::unique('users', 'hp')->ignore($userId)],
+            'phone' => ['required', 'string', 'max:255', Rule::unique('users', 'phone')->ignore($userId)],
         ]);
 
         User::query()->whereKey($userId)->update($validated);
@@ -187,7 +187,7 @@ new class extends Component {
             @component('components.form.input', [
                 'label' => 'No. HP',
                 'type' => 'text',
-                'wireModel' => 'hp',
+                'wireModel' => 'phone',
                 'placeholder' => 'Masukkan nomor HP',
                 'required' => true,
             ])

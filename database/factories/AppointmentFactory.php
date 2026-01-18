@@ -42,6 +42,7 @@ class AppointmentFactory extends Factory
                 AppointmentStatus::DONE,
                 AppointmentStatus::CANCELLED,
             ]),
+            'snap_token' => fake()->optional()->sha1(),
             'notes' => fake()->optional()->sentence(),
         ];
     }

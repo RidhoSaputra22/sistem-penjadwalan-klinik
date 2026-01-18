@@ -248,10 +248,15 @@ new class extends Component {
                                 window.location.reload();
                             },
                             onError: function () {
-                                window.location.reload();
+                                Livewire.dispatch('payment-error', { payload: {
+                                    snapToken: snapToken
+                                } });
                             },
                             onClose: function (){
-                                window.location.reload();
+                                Livewire.dispatch('payment-error', { payload: {
+                                    snapToken: snapToken
+                                } });
+
                             }
                         });
                     })

@@ -32,6 +32,7 @@ class Appointment extends Model implements Eventable, Resourceable
         'scheduled_start',
         'scheduled_end',
         'status',
+        'snap_token',
         'notes',
     ];
 
@@ -46,18 +47,24 @@ class Appointment extends Model implements Eventable, Resourceable
 
     public function toCalendarEvent(): CalendarEvent
     {
+        $doctorName = $this->doctor?->name ?? 'Dokter';
+        $serviceName = $this->service?->name ?? 'Layanan';
+        $title = trim($doctorName . ' - ' . $serviceName, ' -');
+
         return CalendarEvent::make($this)
-            ->title($this->doctor->name . ' - ' . $this->service->name)
+            ->title($title)
             ->start($this->scheduled_date)
             ->end($this->scheduled_date)
-            ->backgroundColor($this->service->color ?? 'primary')
+            ->backgroundColor($this->service?->color ?? 'primary')
             ->allDay();
     }
 
     public function toCalendarResource(): CalendarResource
     {
-        return CalendarResource::make('my-unique-id')
-            ->title($this->name);
+        $resourceId = $this->code ?: (string) $this->getKey();
+
+        return CalendarResource::make($resourceId)
+            ->title($this->code ?: 'Appointment');
     }
 
 
@@ -73,7 +80,7 @@ class Appointment extends Model implements Eventable, Resourceable
 
     public function doctor()
     {
-        return $this->belongsTo(User::class, 'doctor_id')->where('role', UserRole::DOCTOR);
+        return $this->belongsTo(User::class, 'doctor_id', 'id')->where('role', UserRole::DOCTOR->value);
     }
 
     public function service()

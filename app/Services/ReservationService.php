@@ -82,7 +82,7 @@ class ReservationService
         $takenAppointmentsQuery = Appointment::query()
             ->whereDate('scheduled_date', $date)
             ->whereNotNull('scheduled_date')
-            ->where('status', '!=', AppointmentStatus::CANCELLED->value)
+            ->where('status', AppointmentStatus::CONFIRMED->value)
             ->when($excludeAppointmentId !== null, fn ($q) => $q->where('id', '!=', $excludeAppointmentId))
             ->when($roomId !== null, fn ($q) => $q->where('room_id', $roomId))
             ->when($doctorId !== null, fn ($q) => $q->where('doctor_id', $doctorId))
@@ -159,6 +159,10 @@ class ReservationService
 
     /**
      * Membuat reservasi baru dan inisialisasi pembayaran
+     * $data = [
+     *
+     * ]
+     *
      */
     public function createReservation(array $data)
     {
@@ -225,6 +229,7 @@ class ReservationService
                 'service_id' => $service->id,
                 'scheduled_date' => $scheduledDate instanceof Carbon ? $scheduledDate->toDateString() : null,
                 'status' => AppointmentStatus::PENDING,
+                'snap_token' => null,
                 'patient_id' => $patient->id,
                 'scheduled_start' => $scheduleStart ? $scheduleStart->format('H:i:s') : null,
                 'scheduled_end' => $scheduleEnd ? $scheduleEnd->format('H:i:s') : null,
@@ -261,6 +266,7 @@ class ReservationService
 
             // Simpan Snap Token ke booking
             $booking->update(['snap_token' => $snapToken]);
+            $booking->refresh();
 
             $user->notify(new GenericDatabaseNotification(
                 message: 'Booking berhasil dibuat. Silakan lakukan pembayaran untuk konfirmasi.',
@@ -323,7 +329,7 @@ class ReservationService
 
         if (in_array($transactionStatus, ['capture', 'settlement'], true)) {
             $booking->update(['status' => AppointmentStatus::CONFIRMED]);
-            $this->processFCFS($booking);
+            $this->processReservation($booking);
 
             return [
                 'ok' => true,
@@ -581,7 +587,7 @@ class ReservationService
     /**
      * Algoritma FCFS → Menentukan dokter & ruangan pertama yang tersedia
      */
-    protected function processFCFS(Appointment $booking)
+    public function processReservation(Appointment $booking)
     {
         $booking->loadMissing(['service', 'patient.user']);
 

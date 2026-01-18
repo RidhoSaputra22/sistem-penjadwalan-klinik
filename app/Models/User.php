@@ -35,7 +35,10 @@ class User extends Authenticatable implements FilamentUser
         'role',
         'title',
         'notes',
+        'photo',
     ];
+
+
 
     /**
      * The attributes that should be hidden for serialization.

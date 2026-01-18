@@ -2,36 +2,17 @@
 
 namespace App\Filament\Resources\Appointments\Widgets;
 
-use Carbon\Carbon;
-use App\Models\Service;
+
 use App\Models\Appointment;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
-use Filament\Widgets\Widget;
-use App\Enums\AppointmentStatus;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Guava\Calendar\Enums\Context;
-use App\Models\DoctorAvailability;
 use App\Models\Holiday;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TimePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Guava\Calendar\Enums\CalendarViewType;
 use Guava\Calendar\ValueObjects\FetchInfo;
 use Guava\Calendar\Filament\CalendarWidget;
-use Guava\Calendar\Contracts\ContextualInfo;
-use Guava\Calendar\ValueObjects\CalendarEvent;
-use Guava\Calendar\ValueObjects\DateClickInfo;
-use Guava\Calendar\ValueObjects\EventClickInfo;
-use Guava\Calendar\Filament\Actions\CreateAction;
 use Guava\Calendar\ValueObjects\CalendarResource;
+use App\Enums\AppointmentStatus;
 
 class AppointmentCalendarWidget extends CalendarWidget
 {
@@ -60,7 +41,9 @@ class AppointmentCalendarWidget extends CalendarWidget
     protected function getEvents(FetchInfo $info): Collection|array
     {
         return collect()
-            ->push(...Appointment::query()->get())
+            ->push(...Appointment::query()
+                ->where('status', AppointmentStatus::CONFIRMED)
+                ->get())
             ->push(...Holiday::query()->get());
     }
 

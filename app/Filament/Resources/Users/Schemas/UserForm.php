@@ -9,6 +9,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 
 class UserForm
 {
@@ -17,6 +18,13 @@ class UserForm
         return $schema
             ->components([
                 //
+                 FileUpload::make('photo')
+                    ->label('Foto')
+                    ->disk('public')
+                    ->directory('users')
+                    ->image()
+                    ->imageEditor()
+                    ->columnSpanFull(),
                 TextInput::make('name')
                     ->label('Nama')
                     ->required(),
@@ -28,6 +36,7 @@ class UserForm
                 DateTimePicker::make('email_verified_at')
                     ->native(false)
                     ->disabled(),
+
                 TextInput::make('phone')
                     ->label('Nomor Telepon')
                     ->required()
