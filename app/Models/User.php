@@ -7,14 +7,17 @@ use App\Enums\UserRole;
 use App\Models\Service;
 use App\Models\Appointment;
 use App\Models\DoctorAvailability;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Auth;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -71,6 +74,24 @@ class User extends Authenticatable
             ]);
         });
     }
+
+    // FILAMET AUTH
+    public function canAccessPanel(Panel $panel): bool
+    {
+        switch ($this->role) {
+            case UserRole::ADMIN:
+            case UserRole::DOCTOR:
+            case UserRole::RECEPTIONIST:
+                return true;
+            case UserRole::PATIENT:
+                return false;
+        }
+
+
+
+        return false;
+    }
+
 
     // === Relasi ===
     public function services(): BelongsToMany

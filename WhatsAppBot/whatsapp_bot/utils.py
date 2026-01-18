@@ -1,5 +1,4 @@
 import sys
-import win32clipboard
 import pyperclip
 from PIL import Image
 import io
@@ -9,18 +8,20 @@ from contextlib import contextmanager
 
 import time
 
+if sys.platform == 'win32':
+    import win32clipboard
 
 @contextmanager
 def clipboard_context():
     """
     Context manager for safe clipboard operations.
-    
+
     Note: This uses win32clipboard which is Windows-specific.
     For cross-platform clipboard operations, use copy_text_to_clipboard() instead.
     """
     if sys.platform != 'win32':
         raise NotImplementedError("clipboard_context is only supported on Windows")
-    
+
     win32clipboard.OpenClipboard()
     try:
         yield
@@ -31,13 +32,13 @@ def clipboard_context():
 def copy_image_to_clipboard(image_path):
     """
     Copy image to clipboard.
-    
+
     Note: This function is Windows-specific due to win32clipboard usage.
     On other platforms, this will raise NotImplementedError.
     """
     if sys.platform != 'win32':
         raise NotImplementedError("copy_image_to_clipboard is only supported on Windows")
-    
+
     image = Image.open(image_path)
 
     output = io.BytesIO()
@@ -52,7 +53,7 @@ def copy_image_to_clipboard(image_path):
 def copy_text_to_clipboard(text: str):
     """
     Copy text to clipboard using pyperclip (cross-platform).
-    
+
     This function works on Windows, Linux, and macOS.
     """
     pyperclip.copy(text)
@@ -67,7 +68,7 @@ def generate_qr_code(
 ) -> Path:
     """
     Generate QR code image from given data.
-    
+
     Optimized to avoid redundant operations and properly handle resources.
 
     :param data: Data to encode in QR
@@ -123,4 +124,3 @@ def clear_cache_dir(cache_dir: Path | str = "temp"):
         except OSError as e:
             # Use logging if available, otherwise print
             print(f"Failed to delete {file}: {e}")
-    

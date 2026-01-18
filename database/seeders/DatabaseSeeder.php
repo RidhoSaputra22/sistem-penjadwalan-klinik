@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Room;
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Doctor;
 use Illuminate\Database\Seeder;
 use Database\Seeders\DoctorSeeder;
 use Illuminate\Support\Facades\Hash;
@@ -33,16 +34,21 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('user'),
         ]);
 
-        Category::factory()
-        ->count(5)
-        ->hasServices(4)
+        // Category::factory()
+        // ->count(5)
+        // ->hasServices(4)
 
-        ->create();
+        // ->create();
 
         Room::factory()
         ->count(5)
         ->create();
 
-        $this->call(DoctorSeeder::class);
+        Doctor::factory()
+        ->count(1)
+        ->hasServices(1)
+        ->create();
+
+        // $this->call(DoctorSeeder::class);
     }
 }

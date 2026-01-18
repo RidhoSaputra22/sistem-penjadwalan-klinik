@@ -248,10 +248,10 @@ new class extends Component {
                                 window.location.reload();
                             },
                             onError: function () {
-                                alert('Pembayaran gagal diproses. Silakan coba lagi.');
+                                window.location.reload();
                             },
-                            onClose: function () {
-                                // user closed the popup
+                            onClose: function (){
+                                window.location.reload();
                             }
                         });
                     })

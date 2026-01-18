@@ -40,5 +40,5 @@ new class extends Component {
         </div>
     </div>
 
-    @include('layouts.footter')
+    {{-- @include('layouts.footter') --}}
 </div>

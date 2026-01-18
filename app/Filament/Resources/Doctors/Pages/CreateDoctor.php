@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\Doctors\DoctorResource;
+use App\Models\Doctor;
 
 class CreateDoctor extends CreateRecord
 {
@@ -15,6 +16,8 @@ class CreateDoctor extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
+        // dd($data);
+
         $record = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -25,6 +28,12 @@ class CreateDoctor extends CreateRecord
             'notes' => $data['notes'],
         ]);
 
-        return $record;
+        $doctor = Doctor::create([
+            'user_id' => $record->id,
+        ]);
+
+        // dd($doctor);
+
+        return $doctor;
     }
 }

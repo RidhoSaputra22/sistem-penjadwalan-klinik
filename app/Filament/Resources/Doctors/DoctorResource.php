@@ -51,7 +51,9 @@ class DoctorResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('role', UserRole::DOCTOR);
+        return parent::getEloquentQuery()->whereHas('user', function (Builder $query) {
+            $query->where('role', UserRole::DOCTOR);
+        });
     }
 
     public static function getPages(): array

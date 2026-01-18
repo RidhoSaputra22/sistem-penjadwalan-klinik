@@ -6,6 +6,8 @@ use App\Services\ReservationService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Livewire\Volt\Component;
+use App\Enums\AppointmentStatus;
+
 
 new class extends Component
 {
@@ -76,6 +78,9 @@ new class extends Component
         $events = Appointment::query()
             ->with(['patient', 'service'])
             ->when($this->excludeAppointmentId !== null, fn ($q) => $q->where('id', '!=', $this->excludeAppointmentId))
+            ->where('service_id', $this->service->id)
+            ->whereDate('scheduled_date', '>=', Carbon::now()->toDateString())
+            ->where('status', AppointmentStatus::CONFIRMED  )
             ->get()
             ->map(function (Appointment $appointment) {
                 $date = Carbon::parse((string) $appointment->scheduled_date)->toDateString();
@@ -161,6 +166,12 @@ new class extends Component
                     Livewire.dispatch('select-date', {
                         date: info.dateStr
                     });
+                },
+
+                validRange: function (nowDate) {
+                    return {
+                        start: nowDate,
+                    };
                 },
 
 

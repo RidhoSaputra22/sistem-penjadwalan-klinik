@@ -19,7 +19,7 @@ Volt::route('/user/dashboard', 'user.dashboard.dashboard')->name('user.dashboard
 Volt::route('/services', 'guest.services.index')->name('guest.services.index');
 Volt::route('/about', 'guest.about.index')->name('guest.about.index');
 
-Route::get('/logout', function () {
+Route::post('/logout', function () {
     Auth::logout();
-    // return redirect()->route('user.auth.login');
+    return redirect(route('guest.home.welcome'));
 })->name('user.logout');

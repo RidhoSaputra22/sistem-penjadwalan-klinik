@@ -28,17 +28,25 @@ class ServicesRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('code')
-                    ->disabled()
-                    ->label('Kode'),
+                  FileUpload::make('photo')
+                    ->label('Foto')
+                    ->disk('public')
+                    ->directory('services')
+                    ->image()
+                    ->columnSpanFull(),
                 Select::make('category_id')
                     ->label('Kategori')
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->createOptionForm([
+                        TextInput::make('name')
+                            ->label('Nama Kategori')
+                            ->required(),
+                    ]),
                 TextInput::make('name')
-                    ->label('Pelayanan')
+                    ->label('Nama Layanan')
                     ->required(),
                 TextInput::make('duration_minutes')
                     ->label('Durasi (menit)')
@@ -47,21 +55,18 @@ class ServicesRelationManager extends RelationManager
                     ->default(30),
                 TextInput::make('price')
                     ->label('Harga')
+                    ->prefix('Rp')
                     ->required()
                     ->numeric()
                     ->minValue(0)
                     ->default(0),
+
+                ColorPicker::make('color')
+                    ->label('Warna'),
                 Textarea::make('description')
                     ->label('Deskripsi')
                     ->columnSpanFull(),
-                FileUpload::make('photo')
-                    ->label('Foto')
-                    ->disk('public')
-                    ->directory('services')
-                    ->image(),
-                ColorPicker::make('color')
-                    ->label('Warna')
-                    ->required()
+
             ])->columns(3);
     }
 
@@ -69,6 +74,7 @@ class ServicesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
+            ->allowDuplicates()
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
@@ -77,13 +83,24 @@ class ServicesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->label('Buat Layanan Baru'),
                 AttachAction::make()
                     ->label('Kaitkan')
-                    ->preloadRecordSelect(),
+                    ->preloadRecordSelect()
+                     ->recordSelectOptionsQuery(fn ($query, $livewire) =>
+                        $query->whereNotExists(function ($subquery) use ($livewire) {
+                            $subquery->from('doctor_services')
+                                ->whereColumn('doctor_services.service_id', 'services.id')
+                                ->where('doctor_services.user_id', $livewire->getOwnerRecord()->user_id);
+                        })
+                    )
+                    ->multiple(),
+
             ])
             ->recordActions([
                 DetachAction::make(),
+                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

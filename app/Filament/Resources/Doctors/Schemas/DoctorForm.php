@@ -22,7 +22,7 @@ class DoctorForm
                     ->required(),
                 TextInput::make('email')
                     ->label('Email address')
-                    ->unique(ignoreRecord: true)
+                    ->unique(table: 'users', ignoreRecord: true)
                     ->email()
                     ->required(),
                 DateTimePicker::make('email_verified_at')

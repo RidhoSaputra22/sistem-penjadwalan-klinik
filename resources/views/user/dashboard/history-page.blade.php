@@ -235,7 +235,7 @@ new class extends Component {
                     </td>
                     <td class="py-3">
                         <div class="flex items-center gap-2">
-                            @if (in_array($booking->status?->value, ['pending','confirmed'], true))
+                            @if (in_array($booking->status?->value, [AppointmentStatus::CONFIRMED], true))
                                 <button
                                     wire:click="openReschedule({{ (int) $booking->id }})"
                                     class="px-3 py-2 bg-gray-900 rounded-sm text-white text-xs">
@@ -246,7 +246,15 @@ new class extends Component {
                                     class="px-3 py-2 bg-red-600 rounded-sm text-white text-xs">
                                     Batalkan
                                 </button>
+                            @elseif(in_array($booking->status?->value, [AppointmentStatus::PENDING], true))
+                                <button
+                                    wire:click="paidBooking({{ (int) $booking->id }})"
+                                    class="px-3 py-2 bg-gray-900 rounded-sm text-white text-xs">
+                                    Bayar Sekarang
+                                </button>
+
                             @else
+
                                 <span class="text-xs text-gray-500">-</span>
                             @endif
                         </div>

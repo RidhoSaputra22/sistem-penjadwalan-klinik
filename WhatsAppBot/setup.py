@@ -1,10 +1,14 @@
 from setuptools import setup, find_packages
 from pathlib import Path
+import sys
 
 BASE_DIR = Path(__file__).parent
 
-long_description = (BASE_DIR / "README.md").read_text(encoding="utf-8") \
-    if (BASE_DIR / "README.md").exists() else ""
+long_description = (
+    (BASE_DIR / "README.md").read_text(encoding="utf-8")
+    if (BASE_DIR / "README.md").exists()
+    else ""
+)
 
 setup(
     name="whatsapp-selenium-bot",
@@ -26,11 +30,13 @@ setup(
         "qrcode[pil]>=7.4.2",
         "pillow>=10.0.0",
         "pyperclip>=1.8.2",
-        "pywin32",
         "flask>=2.3.0",
         "flask-cors>=3.0.10",
         "mysql-connector-python>=8.0.33",
         "python-dotenv>=1.0.0",
+
+        # Windows only
+        'pywin32; platform_system=="Windows"',
     ],
 
     extras_require={
@@ -38,7 +44,12 @@ setup(
             "black",
             "flake8",
             "mypy",
-        ]
+        ],
+        "linux": [
+            # optional helpers for clipboard on Linux
+            "xclip; platform_system=='Linux'",
+            "xsel; platform_system=='Linux'",
+        ],
     },
 
     classifiers=[

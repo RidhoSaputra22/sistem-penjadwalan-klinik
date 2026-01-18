@@ -230,6 +230,8 @@ class ReservationService
                 'scheduled_end' => $scheduleEnd ? $scheduleEnd->format('H:i:s') : null,
             ]);
 
+            // dd($booking);
+
 
 
             // Buat parameter pembayaran Midtrans

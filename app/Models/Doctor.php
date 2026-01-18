@@ -16,6 +16,7 @@ class Doctor extends Model
     protected $table = 'doctors';
 
     protected $fillable = [
+
         'user_id',
         'slug',
         'sip_number',

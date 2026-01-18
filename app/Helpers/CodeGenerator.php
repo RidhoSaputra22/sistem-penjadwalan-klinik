@@ -21,7 +21,8 @@ class CodeGenerator
         $today = Carbon::now()->format('Ymd');
         $count = Appointment::whereDate('created_at', Carbon::today())->count() + 1;
         $sequence = str_pad($count, 4, '0', STR_PAD_LEFT);
-        return "AP-{$today}-{$sequence}";
+        $threeRandomLetter = strtoupper(Str::random(3));
+        return "AP-{$today}-{$sequence}-{$threeRandomLetter}";
     }
 
     /**

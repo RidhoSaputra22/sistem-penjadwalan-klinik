@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Green,
+                'primary' => Color::Red,
             ])
             ->profile(EditProfilePage::class, isSimple: false)
             ->favicon(asset('images/logo.jpg')) // ← Tambahkan baris ini

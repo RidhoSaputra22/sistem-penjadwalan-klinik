@@ -12,6 +12,8 @@ new class extends Component {
     public function mount($slug)
     {
         $this->servicesSlug = $slug;
+
+
     }
 
 
@@ -23,16 +25,26 @@ new class extends Component {
         $payload = $payload ?? [];
 
         if (($result['ok'] ?? false) === true && ($result['message'] ?? '') === 'Payment confirmed') {
-            session()->flash('success', 'Pembayaran berhasil! Terima kasih telah melakukan reservasi.');
+
             $this->dispatch('booking-updated-nav');
             $this->dispatch('booking-success');
+            $this->dispatch('notification-updated');
+
+            $this->dispatch('open-alert', 'success', 'Pembayaran berhasil!', 'Pembayaran Anda telah berhasil diproses.');
+
 
         } else {
-            session()->flash('error', 'Status pembayaran belum dikonfirmasi. Silakan cek kembali.');
+        $this->dispatch('open-alert', 'error', 'Terjadi kesalahan pada proses pembayaran.', 'Silakan coba lagi atau hubungi layanan pelanggan.');
         }
-
-
     }
+
+    #[On('payment-error')]
+    public function handlePaymentError($payload)
+    {
+        $this->dispatch('open-alert', 'error', 'Pembayaran Gagal', 'Terjadi kesalahan pada proses pembayaran. Silakan coba lagi atau hubungi layanan pelanggan.');
+    }
+
+
 
 
     public function with(){
@@ -88,6 +100,6 @@ new class extends Component {
 
     </div>
 
-    @livewire('layouts.footter')
+    {{-- @livewire('layouts.footter') --}}
 
 </div>

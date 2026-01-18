@@ -29,7 +29,8 @@
 
     @livewire('components.alert')
     @livewire('user.auth.modal.auth-modal')
-    @include('components.toolbar', ['isDebug' => 1])
+    @include('components.toolbar', ['isDebug' => 0])
+    @livewire('layouts.components.pending-snack-bar')
 
 
     {{-- Swiper --}}

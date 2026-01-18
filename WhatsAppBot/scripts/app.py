@@ -186,6 +186,8 @@ def send_whatsapp():
         booking_code = data.get("booking_code")
         paket_slug = data.get("paket_slug")
 
+
+
         user = get_user_by_email(user_email)
         booking = get_booking_by_code(booking_code)
         paket = get_paket_by_slug(paket_slug)

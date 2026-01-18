@@ -35,10 +35,12 @@ class EditDoctor extends EditRecord
                         ->columnSpanFull(),
                 ])
                 ->action(function ($record, array $data): void {
-                    $record->password = $data['password'];
-                    $record->save();
+                    $record->user->password = $data['password'];
+                    $record->user->save();
 
-                    if ($record->wasChanged()) {
+
+
+                    if ($record->user->wasChanged('password')) {
                         Notification::make()
                             ->success()
                             ->title('Password berhasil diubah')
@@ -53,5 +55,17 @@ class EditDoctor extends EditRecord
 
 
         ];
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['name'] = $this->record->user->name;
+        $data['email'] = $this->record->user->email;
+        $data['email_verified_at'] = $this->record->user->email_verified_at;
+        $data['phone'] = $this->record->user->phone;
+        $data['title'] = $this->record->user->title;
+        $data['notes'] = $this->record->user->notes;
+
+        return parent::mutateFormDataBeforeFill($data);
     }
 }

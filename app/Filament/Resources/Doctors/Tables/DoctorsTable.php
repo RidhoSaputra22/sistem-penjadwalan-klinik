@@ -15,22 +15,19 @@ class DoctorsTable
         return $table
             ->columns([
                 //
-                TextColumn::make('name')
+                TextColumn::make('user.name')
                     ->label('Name')
                     ->searchable(),
-                TextColumn::make('email')
+                TextColumn::make('user.email')
                     ->label('Email Address')
                     ->searchable(),
-                TextColumn::make('email_verified_at')
+                TextColumn::make('user.email_verified_at')
                     ->label('Email Terverifikasi Pada')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('phone')
+                TextColumn::make('user.phone')
                     ->label('Nomor Telepon')
                     ->searchable(),
-                TextColumn::make('role')
-                    ->label('Role')
-                    ->badge(),
                 TextColumn::make('title')
                     ->label('Title')
                     ->searchable(),
