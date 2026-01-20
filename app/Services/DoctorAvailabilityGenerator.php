@@ -2,21 +2,12 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
-use App\Models\Room;
-use App\Models\User;
-use App\Models\Holiday;
-use App\Models\Service;
-use App\Models\RrPointer;
-use App\Models\Appointment;
+use App\Enums\WeekdayEnum;
 use App\Models\DoctorAvailability;
-use Carbon\Traits\Timestamp;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\QueryException;
 
 class DoctorAvailabilityGenerator
 {
-    public function generateSchedule(int $doctorId, int $hariAwal, int $hariAkhir, string $start, string $end)
+    public function generateSchedule(int $doctorId, array $hariRange, array $timeRange): array
     {
         try {
             $data = DoctorAvailability::where('user_id', $doctorId);
@@ -25,18 +16,21 @@ class DoctorAvailabilityGenerator
                 $data->delete();
             }
 
-            for ($i = $hariAwal; $i <= $hariAkhir; $i++) {
+            foreach ($hariRange as $key => $hari) {
+                // dd($hari, WeekdayEnum::from($key)->value);
+
                 $data = new DoctorAvailability;
                 $data->user_id = $doctorId;
-                $data->weekday = $i;
-                $data->start_time = $start;
-                $data->end_time = $end;
+                $data->weekday = WeekdayEnum::from($key)->value;
+                $data->start_time = $timeRange[0];
+                $data->end_time = $timeRange[count($timeRange) - 1];
                 $data->is_active = true;
                 $data->save();
             }
 
             return $this->success('Jadwal Dokter berhasil dijadwalkan');
         } catch (\Exception $e) {
+
             return $this->error($e->getMessage());
         }
     }

@@ -2,26 +2,24 @@
 
 namespace App\Filament\Resources\Appointments\Widgets;
 
-
+use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Holiday;
-use Illuminate\Support\Collection;
-use Illuminate\Support\HtmlString;
-use Illuminate\Database\Eloquent\Builder;
 use Guava\Calendar\Enums\CalendarViewType;
-use Guava\Calendar\ValueObjects\FetchInfo;
 use Guava\Calendar\Filament\CalendarWidget;
 use Guava\Calendar\ValueObjects\CalendarResource;
-use App\Enums\AppointmentStatus;
+use Guava\Calendar\ValueObjects\FetchInfo;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 
 class AppointmentCalendarWidget extends CalendarWidget
 {
     protected static ?string $pollingInterval = null;
+
     protected CalendarViewType $calendarView = CalendarViewType::DayGridMonth;
+
     protected ?string $locale = 'ID';
-
-
-
 
     public function getHeading(): string|HtmlString
     {
@@ -36,26 +34,24 @@ class AppointmentCalendarWidget extends CalendarWidget
     /**
      * Generate recurring weekly doctor schedules for the entire month.
      */
-
-
     protected function getEvents(FetchInfo $info): Collection|array
     {
+
         return collect()
             ->push(...Appointment::query()
                 ->where('status', AppointmentStatus::CONFIRMED)
                 ->get())
             ->push(...Holiday::query()->get());
+
     }
 
-    protected function getResources(): Collection | array | Builder
+    protected function getResources(): Collection|array|Builder
     {
         return [
             CalendarResource::make('baz') // This has to be unique ID
                 ->title('My resource'),
         ];
     }
-
-
 
     protected function getCalendarOptions(): array
     {

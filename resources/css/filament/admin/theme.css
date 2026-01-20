@@ -5,6 +5,7 @@
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../vendor/guava/calendar/resources/**/*';
 
+
 .fi-sidebar {
     @apply bg-red-700;
 }

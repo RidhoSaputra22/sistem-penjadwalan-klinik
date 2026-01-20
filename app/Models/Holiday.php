@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Guava\Calendar\Contracts\Eventable;
 use Guava\Calendar\ValueObjects\CalendarEvent;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Holiday extends Model implements Eventable
 {
@@ -29,7 +29,7 @@ class Holiday extends Model implements Eventable
             ->title($this->name)
             ->start($this->date)
             ->end($this->date)
-            ->backgroundColor('red')
+            ->backgroundColor('green')
             ->allDay();
     }
 }

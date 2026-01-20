@@ -2,29 +2,24 @@
 
 namespace App\Filament\Resources\DoctorAvailabilities\Widgets;
 
+use App\Models\DoctorAvailability;
 use Carbon\Carbon;
 use Carbon\WeekDay;
-use Filament\Widgets\Widget;
-use App\Models\DoctorAvailability;
-use Illuminate\Support\Collection;
-use Illuminate\Support\HtmlString;
-use Illuminate\Database\Eloquent\Builder;
 use Guava\Calendar\Enums\CalendarViewType;
-use Guava\Calendar\Filament\Actions\CreateAction;
-use Guava\Calendar\ValueObjects\FetchInfo;
 use Guava\Calendar\Filament\CalendarWidget;
 use Guava\Calendar\ValueObjects\CalendarEvent;
-use Guava\Calendar\ValueObjects\DateClickInfo;
-
+use Guava\Calendar\ValueObjects\FetchInfo;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 
 class DoctorAvailabilityCalendar extends CalendarWidget
 {
     protected static ?string $pollingInterval = '5s';
 
     protected CalendarViewType $calendarView = CalendarViewType::DayGridMonth;
+
     protected bool $dateClickEnabled = true;
-
-
 
     public function getHeading(): string|HtmlString
     {
@@ -52,6 +47,14 @@ class DoctorAvailabilityCalendar extends CalendarWidget
         $startOfRange = Carbon::parse($info->start);
         $endOfRange = Carbon::parse($info->end);
 
+        // map doctor colors
+        $colors = ['red', 'blue', 'green', 'orange', 'purple', 'teal', 'pink', 'yellow'];
+        $doctors = $availabilities->pluck('doctor')->unique('id')->values();
+        $doctorColors = [];
+        foreach ($doctors as $index => $doctor) {
+            $doctorColors[$doctor->id] = $colors[$index % count($colors)];
+        }
+
         foreach ($availabilities as $availability) {
             $startTime = Carbon::parse($availability->start_time);
             $endTime = Carbon::parse($availability->end_time);
@@ -71,7 +74,9 @@ class DoctorAvailabilityCalendar extends CalendarWidget
                             ->title("{$availability->doctor->name}")
                             ->start($start)
                             ->end($end)
+                            ->backgroundColor($doctorColors[$availability->doctor->id])
                     );
+
                 }
 
                 $currentDate->addDay();
@@ -80,8 +85,6 @@ class DoctorAvailabilityCalendar extends CalendarWidget
 
         return $events;
     }
-
-
 
     /**
      * Customize FullCalendar options

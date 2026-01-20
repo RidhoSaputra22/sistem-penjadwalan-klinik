@@ -8,6 +8,7 @@ use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\Appointments\AppointmentResource;
 use App\Services\ReservationService;
 use Carbon\Carbon;
+use Filament\Notifications\Notification;
 
 class CreateAppointment extends CreateRecord
 {
@@ -15,6 +16,7 @@ class CreateAppointment extends CreateRecord
 
     protected function handleRecordCreation(array $data): Model
     {
+        try {
         $reservationService = new ReservationService();
 
         $userId = isset($data['patient_id']) ? (int) $data['patient_id'] : 0;
@@ -53,5 +55,14 @@ class CreateAppointment extends CreateRecord
 
 
         return $booking;
+
+        }catch (\Exception $e) {
+            Notification::make()
+                ->title('Error creating appointment: ' . $e->getMessage())
+                ->danger()
+                ->send();
+
+            throw $e;
+        }
     }
 }

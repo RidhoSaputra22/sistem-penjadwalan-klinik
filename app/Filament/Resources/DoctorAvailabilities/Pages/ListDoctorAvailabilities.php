@@ -3,17 +3,15 @@
 namespace App\Filament\Resources\DoctorAvailabilities\Pages;
 
 use App\Enums\WeekdayEnum;
-use Filament\Actions\Action;
-
-use Filament\Forms\Components\Select;
-
-use Filament\Notifications\Notification;
-use Filament\Forms\Components\TimePicker;
-use Filament\Resources\Pages\ListRecords;
-
-use App\Services\DoctorAvailabilityGenerator;
+use App\Filament\Forms\Components\FieldRangePicker;
 use App\Filament\Resources\DoctorAvailabilities\DoctorAvailabilityResource;
 use App\Filament\Resources\DoctorAvailabilities\Widgets\DoctorAvailabilityCalendar;
+use App\Models\SesiPertemuan;
+use App\Services\DoctorAvailabilityGenerator;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
 
 class ListDoctorAvailabilities extends ListRecords
 {
@@ -31,31 +29,26 @@ class ListDoctorAvailabilities extends ListRecords
                         ->searchable()
                         ->preload()
                         ->required(),
-                    Select::make('hari_awal')
-                        ->label('Hari awal')
-                        ->options(WeekdayEnum::class)
-                        ->native(false)
+                    FieldRangePicker::make('jadwal_range')
+                        ->label('Pilih Hari Kerja')
+                        ->options(collect(WeekdayEnum::cases())->mapWithKeys(fn (WeekdayEnum $enum) => [
+                            strtolower($enum->name) => $enum->getLabel(),
+                        ])->toArray())
+
                         ->required(),
-                    Select::make('hari_akhir')
-                        ->label('Hari akhir')
-                        ->options(WeekdayEnum::class)
-                        ->native(false)
-                        ->required(),
-                    TimePicker::make('start_time')
-                        ->label('Waktu Mulai')
-                        ->native(false)
-                        ->default('08:00')
-                        ->required(),
-                    TimePicker::make('end_time')
-                        ->label('Waktu Selesai')
-                        ->native(false)
-                        ->default('08:00')
-                        ->required(),
+                    FieldRangePicker::make('time_range')
+                        ->label('Pilih Jam Kerja')
+                        ->options(SesiPertemuan::pluck('session_time', 'session_time')->toArray())
+                        ->required()
+                        ->columns(4),
 
                 ])
                 ->action(function (array $data) {
+                    // dd($data);
+
                     $generator = new DoctorAvailabilityGenerator;
-                    $response = $generator->generateSchedule($data['user_id'], $data['hari_awal']->value, $data['hari_akhir']->value, $data['start_time'], $data['end_time']);
+
+                    $response = $generator->generateSchedule($data['user_id'], $data['jadwal_range'], $data['time_range']);
 
                     if ($response['status'] === 'success') {
                         Notification::make()
@@ -71,7 +64,7 @@ class ListDoctorAvailabilities extends ListRecords
                     }
                 })
                 ->modalHeading('Buat Jadwal Dokter')
-                ->modalDescription('Isi data dibawah untuk membuat jadwal')
+                ->modalDescription('Isi data dibawah untuk membuat jadwal'),
 
         ];
     }
