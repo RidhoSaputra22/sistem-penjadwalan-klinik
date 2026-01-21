@@ -2,15 +2,16 @@
 
 use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     //
 
-    public function with(){
+    public function with()
+    {
         return [
             'services' => \App\Models\Service::all(),
         ];
     }
-
 }; ?>
 
 <div class="relative">
@@ -18,7 +19,7 @@ new class extends Component {
 
     {{-- Content --}}
     @livewire('guest.home.components.banner')
-    @livewire('guest.home.components.medical-services')
+    <!-- @livewire('guest.home.components.medical-services') -->
     @livewire('guest.home.components.doctors')
     @livewire('guest.home.components.services')
     @livewire('guest.home.components.about-us')
