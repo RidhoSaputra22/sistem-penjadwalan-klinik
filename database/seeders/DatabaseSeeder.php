@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\Appointment;
-use App\Models\Category;
 use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Room;
@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('admin'),
+            'role' => UserRole::ADMIN,
 
         ]);
 
@@ -36,12 +37,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'User',
             'email' => 'user@gmail.com',
             'password' => Hash::make('user'),
+            'role' => UserRole::PATIENT,
         ]);
-
-        // Category::factory()
-        //     ->count(1)
-        //     ->hasServices(1)
-        //     ->create();
 
         Room::factory()
             ->count(5)

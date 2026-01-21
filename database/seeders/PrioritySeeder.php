@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Priority;
+use App\Models\Service;
 use Illuminate\Database\Seeder;
 
 class PrioritySeeder extends Seeder
@@ -20,10 +21,14 @@ class PrioritySeeder extends Seeder
         ];
 
         foreach ($rows as $row) {
-            Priority::query()->updateOrCreate(
+            $priority = Priority::query()->updateOrCreate(
                 ['level' => $row['level']],
                 ['name' => $row['name'], 'color' => $row['color']]
             );
+
+            Service::factory()
+                ->count(5)
+                ->create(['priority_id' => $priority->id]);
         }
     }
 }

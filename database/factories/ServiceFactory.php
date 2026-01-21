@@ -17,16 +17,16 @@ class ServiceFactory extends Factory
     {
 
         $serviceNames = [
-            'Konsultasi Dokter',
-            'Pemeriksaan Fisik',
-            'Tes Laboratorium',
-            'Rontgen',
-            'USG',
-            'EKG',
-            'Terapi Fisik',
-            'Vaksinasi',
-            'Pengobatan Luka',
-            'Konseling Gizi',
+            'Konsultasi Ortodonti',
+            'Pemeriksaan Gigi dan Mulut',
+            'Pemasangan Behel',
+            'Kontrol dan Penyesuaian Behel',
+            'Pencetakan Gigi (Cetakan / Scan)',
+            'Pembersihan Karang Gigi',
+            'Penambalan Gigi',
+            'Pencabutan Gigi',
+            'Perawatan Saluran Akar',
+            'Pemasangan Retainer',
         ];
 
         $name = fake()->randomElement($serviceNames);

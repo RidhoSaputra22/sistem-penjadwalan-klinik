@@ -76,7 +76,6 @@ class User extends Authenticatable implements FilamentUser
     // FILAMET AUTH
     public function canAccessPanel(Panel $panel): bool
     {
-
         if ($this->role == UserRole::ADMIN) {
 
             return true;
