@@ -4,17 +4,14 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserRole;
-use App\Models\Service;
-use App\Models\Appointment;
-use App\Models\DoctorAvailability;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable implements FilamentUser
@@ -37,8 +34,6 @@ class User extends Authenticatable implements FilamentUser
         'notes',
         'photo',
     ];
-
-
 
     /**
      * The attributes that should be hidden for serialization.
@@ -81,15 +76,12 @@ class User extends Authenticatable implements FilamentUser
     // FILAMET AUTH
     public function canAccessPanel(Panel $panel): bool
     {
-        if(Auth::check() && $this->role == UserRole::ADMIN){
+        if (Auth::check() && $this->role == UserRole::ADMIN) {
             return true;
-        }{
-
-
+        }
 
         return false;
     }
-
 
     // === Relasi ===
     public function services(): BelongsToMany
