@@ -9,6 +9,7 @@ use App\Models\Service;
 use App\Models\SesiPertemuan;
 use App\Models\User;
 use Carbon\Carbon;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -28,7 +29,7 @@ class AppointmentForm
                     ->visibleOn('edit'),
                 Select::make('patient_id')
                     ->label('Pasien')
-                    ->options(Patient::get()->pluck('user.name', 'id'))
+                    ->options(Patient::query()->with('user')->get(['id', 'user_id'])->pluck('user.name', 'id'))
                     ->required()
                     ->searchable()
                     ->createOptionModalHeading('Pasien Baru')
@@ -135,6 +136,46 @@ class AppointmentForm
                     ->default(AppointmentStatus::PENDING)
                     ->options(AppointmentStatus::class)
                     ->required(),
+
+                // Data antrean (untuk laporan KPI: AWT/TAT/panjang antrean/no-show)
+                DateTimePicker::make('checked_in_at')
+                    ->label('Check-in')
+                    ->native(false)
+                    ->seconds(false)
+                    ->visibleOn('edit'),
+                DateTimePicker::make('called_at')
+                    ->label('Dipanggil')
+                    ->native(false)
+                    ->seconds(false)
+                    ->visibleOn('edit'),
+                DateTimePicker::make('service_started_at')
+                    ->label('Layanan Mulai')
+                    ->native(false)
+                    ->seconds(false)
+                    ->visibleOn('edit'),
+                DateTimePicker::make('service_ended_at')
+                    ->label('Layanan Selesai')
+                    ->native(false)
+                    ->seconds(false)
+                    ->visibleOn('edit'),
+                DateTimePicker::make('no_show_at')
+                    ->label('No Show')
+                    ->helperText('Isi jika pasien tidak hadir.')
+                    ->native(false)
+                    ->seconds(false)
+                    ->visibleOn('edit'),
+                TextInput::make('rescheduled_count')
+                    ->label('Jumlah Reschedule')
+                    ->numeric()
+                    ->disabled()
+                    ->visibleOn('edit'),
+                DateTimePicker::make('last_rescheduled_at')
+                    ->label('Reschedule Terakhir')
+                    ->native(false)
+                    ->seconds(false)
+                    ->disabled()
+                    ->visibleOn('edit'),
+
                 Textarea::make('notes')
                     ->columnSpanFull(),
             ]);

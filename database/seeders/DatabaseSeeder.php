@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Appointment;
 use App\Models\Category;
 use App\Models\Doctor;
+use App\Models\Patient;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -37,10 +38,10 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('user'),
         ]);
 
-        Category::factory()
-            ->count(5)
-            ->hasServices(4)
-            ->create();
+        // Category::factory()
+        //     ->count(1)
+        //     ->hasServices(1)
+        //     ->create();
 
         Room::factory()
             ->count(5)
@@ -51,10 +52,14 @@ class DatabaseSeeder extends Seeder
             ->hasServices(1)
             ->create();
 
-        Appointment::factory()
-            ->count(50)
-            ->hasService(1)
+        Patient::factory()
+            ->count(20)
             ->create();
+
+        // Appointment::factory()
+        //     ->count(50)
+        //     ->hasService(1)
+        //     ->create();
 
         // $this->call(DoctorSeeder::class);
     }

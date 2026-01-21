@@ -6,6 +6,7 @@ use App\Enums\WeekdayEnum;
 use App\Filament\Forms\Components\FieldRangePicker;
 use App\Filament\Resources\DoctorAvailabilities\DoctorAvailabilityResource;
 use App\Filament\Resources\DoctorAvailabilities\Widgets\DoctorAvailabilityCalendar;
+use App\Models\Doctor;
 use App\Models\SesiPertemuan;
 use App\Services\DoctorAvailabilityGenerator;
 use Filament\Actions\Action;
@@ -25,7 +26,9 @@ class ListDoctorAvailabilities extends ListRecords
                 ->schema([
                     Select::make('user_id')
                         ->label('Dokter')
-                        ->relationship('doctor', 'name')
+                        ->options(Doctor::with('user')->get()->mapWithKeys(fn (Doctor $doctor) => [
+                            $doctor->user->id => $doctor->user->name,
+                        ])->toArray())
                         ->searchable()
                         ->preload()
                         ->required(),

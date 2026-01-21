@@ -10,6 +10,7 @@ use App\Notifications\GenericDatabaseNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class ReservationServiceHelper
@@ -157,10 +158,14 @@ class ReservationServiceHelper
     /** @return string[] */
     public static function getSlotTimes(): array
     {
-        return SesiPertemuan::orderBy('session_time')
+        return SesiPertemuan::query()
+            ->orderBy('session_time', 'asc')
             ->pluck('session_time')
+            ->filter()
+            ->unique()
             ->map(fn ($time) => Carbon::createFromTimeString((string) $time)->format('H:i'))
-            ->toArray();
+            ->values()
+            ->all();
     }
 
     /**
@@ -320,7 +325,7 @@ class ReservationServiceHelper
 
     public static function createPendingAppointment(Patient $patient, Service $service, ?Carbon $scheduledAt, ?Carbon $scheduleStart, ?Carbon $scheduleEnd): Appointment
     {
-        return Appointment::create([
+        $payload = [
             'service_id' => $service->id,
             'scheduled_date' => $scheduledAt?->toDateString(),
             'status' => AppointmentStatus::PENDING,
@@ -328,7 +333,13 @@ class ReservationServiceHelper
             'patient_id' => $patient->id,
             'scheduled_start' => $scheduleStart ? $scheduleStart->format('H:i:s') : null,
             'scheduled_end' => $scheduleEnd ? $scheduleEnd->format('H:i:s') : null,
-        ]);
+        ];
+
+        if (Schema::hasColumn('appointments', 'priority_id')) {
+            $payload['priority_id'] = $service->priority_id;
+        }
+
+        return Appointment::create($payload);
     }
 
     public static function buildMidtransSnapParams(User $user, Appointment $booking, Service $service): array

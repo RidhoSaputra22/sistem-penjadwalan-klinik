@@ -17,6 +17,7 @@ use App\Jobs\SendWhatsAppBookingMessage;
 use App\Notifications\GenericDatabaseNotification;
 use App\Services\Helper\ReservationServiceHelper;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Midtrans\Config as MidtransConfig;
 use Midtrans\Snap;
@@ -334,14 +335,33 @@ class ReservationService
             ];
         }
 
-        $booking->update([
+        $update = [
             'doctor_id' => $assignment['doctor_user_id'],
             'room_id' => $assignment['room_id'],
             'scheduled_date' => $assignment['scheduled_date'],
             'scheduled_start' => $assignment['scheduled_start'],
             'scheduled_end' => $assignment['scheduled_end'],
             // status tidak diubah (tetap pending/confirmed sesuai kondisi sebelumnya)
-        ]);
+        ];
+
+        // Rekap reschedule hanya aktif jika kolom tersedia (migration sudah dijalankan)
+        if (Schema::hasColumn('appointments', 'rescheduled_count')) {
+            $update['rescheduled_count'] = ((int) ($booking->rescheduled_count ?? 0)) + 1;
+        }
+        if (Schema::hasColumn('appointments', 'last_rescheduled_at')) {
+            $update['last_rescheduled_at'] = now();
+        }
+        if (Schema::hasColumn('appointments', 'original_scheduled_date')) {
+            $update['original_scheduled_date'] = $booking->original_scheduled_date ?? $booking->scheduled_date;
+        }
+        if (Schema::hasColumn('appointments', 'original_scheduled_start')) {
+            $update['original_scheduled_start'] = $booking->original_scheduled_start ?? $booking->scheduled_start;
+        }
+        if (Schema::hasColumn('appointments', 'original_scheduled_end')) {
+            $update['original_scheduled_end'] = $booking->original_scheduled_end ?? $booking->scheduled_end;
+        }
+
+        $booking->update($update);
 
         $booking->refresh()->loadMissing(['patient.user', 'doctor', 'room', 'service']);
 
