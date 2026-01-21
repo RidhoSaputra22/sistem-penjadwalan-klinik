@@ -31,7 +31,7 @@ class ListDoctorAvailabilities extends ListRecords
                         ->required(),
                     FieldRangePicker::make('jadwal_range')
                         ->label('Pilih Hari Kerja')
-                        ->options(collect(WeekdayEnum::cases())->mapWithKeys(fn (WeekdayEnum $enum) => [
+                        ->options(collect(WeekdayEnum::getWorkDays())->mapWithKeys(fn (WeekdayEnum $enum) => [
                             strtolower($enum->name) => $enum->getLabel(),
                         ])->toArray())
 

@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\User;
-use App\Enums\ColorEnum;
-use App\Models\Appointment;
 use App\Helpers\CodeGenerator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class Service extends Model
 {
@@ -18,6 +15,7 @@ class Service extends Model
 
     protected $fillable = [
         'category_id',
+        'priority_id',
         'name',
         'slug',
         'code',
@@ -46,7 +44,7 @@ class Service extends Model
                 $i = 2;
 
                 while (static::query()->where('slug', $slug)->exists()) {
-                    $slug = $base . '-' . $i;
+                    $slug = $base.'-'.$i;
                     $i++;
                 }
 
@@ -65,6 +63,11 @@ class Service extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function priority(): BelongsTo
+    {
+        return $this->belongsTo(Priority::class);
     }
 
     public function users()

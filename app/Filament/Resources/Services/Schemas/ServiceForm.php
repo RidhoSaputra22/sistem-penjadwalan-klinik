@@ -2,14 +2,12 @@
 
 namespace App\Filament\Resources\Services\Schemas;
 
-use App\Enums\ColorEnum;
-use App\Models\Category;
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\ColorPicker;
+use Filament\Schemas\Schema;
 
 class ServiceForm
 {
@@ -17,7 +15,7 @@ class ServiceForm
     {
         return $schema
             ->components([
-                   FileUpload::make('photo')
+                FileUpload::make('photo')
                     ->label('Foto')
                     ->disk('public')
                     ->directory('services')
@@ -34,6 +32,28 @@ class ServiceForm
                             ->label('Nama Kategori')
                             ->required(),
                     ]),
+                Select::make('priority_id')
+                    ->label('Prioritas')
+                    ->relationship('priority', 'name')
+                    ->searchable()
+                    ->createOptionForm([
+                        TextInput::make('name')
+                            ->label('Nama Prioritas')
+                            ->required(),
+                        TextInput::make('level')
+                            ->label('Level Prioritas')
+                            ->required(),
+                    ])
+                    ->editOptionForm([
+                        TextInput::make('name')
+                            ->label('Nama Prioritas')
+                            ->required(),
+                        TextInput::make('level')
+                            ->label('Level Prioritas')
+                            ->required(),
+                    ])
+
+                    ->preload(),
                 TextInput::make('name')
                     ->label('Nama Layanan')
                     ->required(),
@@ -54,7 +74,7 @@ class ServiceForm
                     ->columnSpanFull(),
 
                 ColorPicker::make('color')
-                    ->label('Warna')
+                    ->label('Warna'),
             ]);
     }
 }

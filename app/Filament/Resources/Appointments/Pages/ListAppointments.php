@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Appointments\Pages;
 
 use App\Filament\Resources\Appointments\AppointmentResource;
-use App\Filament\Resources\Appointments\Widgets\AppointmentCalendarWidget;
+use App\Filament\Resources\Appointments\Widgets\AppointmentCallendarWidget;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -21,7 +21,7 @@ class ListAppointments extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            AppointmentCalendarWidget::class,
+            AppointmentCallendarWidget::class,
         ];
     }
 }

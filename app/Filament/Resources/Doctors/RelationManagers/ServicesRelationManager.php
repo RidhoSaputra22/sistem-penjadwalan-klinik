@@ -2,23 +2,22 @@
 
 namespace App\Filament\Resources\Doctors\RelationManagers;
 
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
-use Filament\Actions\EditAction;
 use Filament\Actions\AttachAction;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DetachAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Forms\Components\Select;
+use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class ServicesRelationManager extends RelationManager
 {
@@ -28,7 +27,7 @@ class ServicesRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                  FileUpload::make('photo')
+                FileUpload::make('photo')
                     ->label('Foto')
                     ->disk('public')
                     ->directory('services')
@@ -45,6 +44,11 @@ class ServicesRelationManager extends RelationManager
                             ->label('Nama Kategori')
                             ->required(),
                     ]),
+                Select::make('priority_id')
+                    ->label('Prioritas')
+                    ->relationship('priority', 'name')
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('name')
                     ->label('Nama Layanan')
                     ->required(),
@@ -88,12 +92,11 @@ class ServicesRelationManager extends RelationManager
                 AttachAction::make()
                     ->label('Kaitkan')
                     ->preloadRecordSelect()
-                     ->recordSelectOptionsQuery(fn ($query, $livewire) =>
-                        $query->whereNotExists(function ($subquery) use ($livewire) {
-                            $subquery->from('doctor_services')
-                                ->whereColumn('doctor_services.service_id', 'services.id')
-                                ->where('doctor_services.user_id', $livewire->getOwnerRecord()->user_id);
-                        })
+                    ->recordSelectOptionsQuery(fn ($query, $livewire) => $query->whereNotExists(function ($subquery) use ($livewire) {
+                        $subquery->from('doctor_services')
+                            ->whereColumn('doctor_services.service_id', 'services.id')
+                            ->where('doctor_services.user_id', $livewire->getOwnerRecord()->user_id);
+                    })
                     )
                     ->multiple(),
 

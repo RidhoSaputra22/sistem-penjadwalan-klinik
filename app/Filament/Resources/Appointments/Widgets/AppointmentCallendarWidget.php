@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
-class AppointmentCalendarWidget extends CalendarWidget
+class AppointmentCallendarWidget extends CalendarWidget
 {
     protected static ?string $pollingInterval = null;
 

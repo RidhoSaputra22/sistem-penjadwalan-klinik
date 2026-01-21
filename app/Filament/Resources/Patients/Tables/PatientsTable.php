@@ -14,18 +14,20 @@ class PatientsTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('user.name')
                     ->label('Nama')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('nik')
                     ->label('NIK')
+                    ->default('-')
                     ->searchable(),
                 TextColumn::make('birth_date')
                     ->label('Tanggal Lahir')
                     ->date()
+
                     ->sortable(),
-                TextColumn::make('phone')
+                TextColumn::make('user.phone')
                     ->label('Nomor Telepon')
                     ->searchable(),
                 TextColumn::make('created_at')

@@ -26,4 +26,16 @@ enum WeekdayEnum: int implements HasLabel
             self::SATURDAY => 'Sabtu',
         };
     }
+
+    public static function getWorkDays(): array
+    {
+        return [
+            self::MONDAY,
+            self::TUESDAY,
+            self::WEDNESDAY,
+            self::THURSDAY,
+            self::FRIDAY,
+            self::SATURDAY,
+        ];
+    }
 }

@@ -5,7 +5,7 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum AppointmentStatus: string implements HasLabel, HasColor
+enum AppointmentStatus: string implements HasColor, HasLabel
 {
     case PENDING = 'pending';
     case CONFIRMED = 'confirmed';
@@ -35,7 +35,7 @@ enum AppointmentStatus: string implements HasLabel, HasColor
         };
     }
 
-      public static function asArray(): array
+    public static function asArray(): array
     {
         return array_map(
             fn (self $status) => [

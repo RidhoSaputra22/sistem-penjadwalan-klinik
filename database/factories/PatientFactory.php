@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,11 +13,12 @@ class PatientFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'user_id' => User::factory(),
             'nik' => fake()->optional()->numerify('################'),
+            'medical_record_number' => fake()->numerify('################'),
             'birth_date' => fake()->optional()->date(),
-            'phone' => fake()->optional()->numerify('08##########'),
             'address' => fake()->optional()->address(),
+
         ];
     }
 }

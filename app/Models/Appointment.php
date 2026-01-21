@@ -2,20 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\Room;
-use App\Models\User;
-use App\Enums\UserRole;
-use App\Models\Patient;
-use App\Models\Service;
-use App\Helpers\CodeGenerator;
 use App\Enums\AppointmentStatus;
-use App\Helpers\AppointmentHelper;
+use App\Enums\UserRole;
+use App\Helpers\CodeGenerator;
 use Guava\Calendar\Contracts\Eventable;
-use Illuminate\Database\Eloquent\Model;
 use Guava\Calendar\Contracts\Resourceable;
 use Guava\Calendar\ValueObjects\CalendarEvent;
 use Guava\Calendar\ValueObjects\CalendarResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Appointment extends Model implements Eventable, Resourceable
 {
@@ -49,13 +44,14 @@ class Appointment extends Model implements Eventable, Resourceable
     {
         $doctorName = $this->doctor?->name ?? 'Dokter';
         $serviceName = $this->service?->name ?? 'Layanan';
-        $title = trim($doctorName . ' - ' . $serviceName, ' -');
+        $time = $this->scheduled_start ? ' pukul '.$this->scheduled_start : '';
+        $title = trim($doctorName.' - '.$serviceName.$time, ' -');
 
         return CalendarEvent::make($this)
             ->title($title)
             ->start($this->scheduled_date)
             ->end($this->scheduled_date)
-            ->backgroundColor($this->service?->color ?? 'primary')
+            ->backgroundColor($this->service?->color ?? 'red')
             ->allDay();
     }
 
@@ -66,7 +62,6 @@ class Appointment extends Model implements Eventable, Resourceable
         return CalendarResource::make($resourceId)
             ->title($this->code ?: 'Appointment');
     }
-
 
     protected $casts = [
         'scheduled_date' => 'date',

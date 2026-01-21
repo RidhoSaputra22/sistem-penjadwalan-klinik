@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Helpers\CodeGenerator;
 use App\Models\Category;
+use App\Models\Priority;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -32,8 +33,9 @@ class ServiceFactory extends Factory
 
         return [
             'category_id' => Category::factory(),
+            'priority_id' => Priority::query()->inRandomOrder()->value('id') ?? Priority::factory(),
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . Str::lower(Str::random(6)),
+            'slug' => Str::slug($name).'-'.Str::lower(Str::random(6)),
             'code' => CodeGenerator::service(),
             'duration_minutes' => fake()->randomElement([15, 20, 30, 45, 60, 90]),
             'price' => fake()->numberBetween(25000, 500000),

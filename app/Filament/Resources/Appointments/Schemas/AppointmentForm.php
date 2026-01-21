@@ -2,25 +2,19 @@
 
 namespace App\Filament\Resources\Appointments\Schemas;
 
-use Carbon\Carbon;
+use App\Enums\AppointmentStatus;
+use App\Enums\UserRole;
 use App\Models\Patient;
 use App\Models\Service;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
-use App\Enums\AppointmentStatus;
+use App\Models\SesiPertemuan;
+use App\Models\User;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Flex;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TimePicker;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
-use App\Filament\Resources\Patients\PatientResource;
-use App\Models\User;
-use App\Enums\UserRole;
-use App\Models\SesiPertemuan;
+use Filament\Schemas\Schema;
 
 class AppointmentForm
 {
@@ -34,7 +28,7 @@ class AppointmentForm
                     ->visibleOn('edit'),
                 Select::make('patient_id')
                     ->label('Pasien')
-                    ->options(User::where('role', UserRole::PATIENT->value)->pluck('name', 'id'))
+                    ->options(Patient::get()->pluck('user.name', 'id'))
                     ->required()
                     ->searchable()
                     ->createOptionModalHeading('Pasien Baru')
@@ -47,7 +41,7 @@ class AppointmentForm
                             ->email(),
 
                         DatePicker::make('birth_date')
-                         ->native(false),
+                            ->native(false),
                         TextInput::make('phone')
                             ->tel(),
                         Textarea::make('address')

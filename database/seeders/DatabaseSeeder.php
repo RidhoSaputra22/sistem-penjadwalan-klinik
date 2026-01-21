@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use App\Models\Room;
-use App\Models\User;
+use App\Models\Appointment;
 use App\Models\Category;
 use App\Models\Doctor;
-use Illuminate\Database\Seeder;
-use Database\Seeders\DoctorSeeder;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Room;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,10 +22,13 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        $this->call(PrioritySeeder::class);
+
         User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('admin'),
+
         ]);
 
         User::factory()->create([
@@ -34,20 +37,24 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('user'),
         ]);
 
-        // Category::factory()
-        // ->count(5)
-        // ->hasServices(4)
-
-        // ->create();
+        Category::factory()
+            ->count(5)
+            ->hasServices(4)
+            ->create();
 
         Room::factory()
-        ->count(5)
-        ->create();
+            ->count(5)
+            ->create();
 
         Doctor::factory()
-        ->count(1)
-        ->hasServices(1)
-        ->create();
+            ->count(1)
+            ->hasServices(1)
+            ->create();
+
+        Appointment::factory()
+            ->count(50)
+            ->hasService(1)
+            ->create();
 
         // $this->call(DoctorSeeder::class);
     }
