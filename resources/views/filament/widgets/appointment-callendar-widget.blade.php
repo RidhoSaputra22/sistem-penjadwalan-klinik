@@ -33,8 +33,8 @@
                         <h1 class="text-xs font-semibold">#{{ $appointment->code }}</h1>
                         <div>
                             <h1 class="text-lg/tight font-medium">
-                                {{ $appointment->patient->user->name }} -
-                                Prioritas: {{ $appointment->service->priority->name }}
+                                {{ $appointment->patient->user->name }}
+
                             </h1>
                             <h1 class="flex font-light">
                                 {{ $appointment->doctor?->name ?? 'Dokter Belum Ditentukan' }} -
@@ -67,8 +67,7 @@
                         <h1 class="text-xs font-semibold">#{{ $appointment->code }}</h1>
                         <div>
                             <h1 class="text-lg/tight font-medium">
-                                {{ $appointment->patient->user->name }} -
-                                Prioritas: {{ $appointment->service->priority->name }}
+                                {{ $appointment->patient->user->name }}
                             </h1>
                             <h1 class="flex font-light">
                                 {{ $appointment->doctor?->name ?? 'Dokter Belum Ditentukan' }} -

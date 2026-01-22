@@ -33,6 +33,21 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
 
     protected string $paginationTheme = 'tailwind';
 
+    public function getAppontmentsQuery()
+    {
+        $query = Appointment::query()
+            ->select('appointments.*')
+            ->join('services', 'appointments.service_id', '=', 'services.id')
+
+            ->with(['doctor', 'patient.user', 'room'])
+            ->where('appointments.status', $this->selectedStatus)
+            ->whereDate('appointments.scheduled_date', now()->toDateString().'')
+
+            ->orderBy('appointments.scheduled_date', 'ASC');
+
+        return $query;
+    }
+
     public function mount(): void
     {
         $this->statusOptions = AppointmentStatus::asArray();
@@ -72,11 +87,11 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
             ->icon('heroicon-o-megaphone')
             ->requiresConfirmation()
             ->action(function (): void {
-                $nextAppointment = Appointment::query()
-                    ->where('status', AppointmentStatus::CONFIRMED)
-                    ->orderBy('scheduled_date')
-                    ->orderBy('scheduled_start')
+                $nextAppointment = $this->getAppontmentsQuery()
+                    ->where('appointments.status', AppointmentStatus::CONFIRMED)
                     ->first();
+
+                // dd($nextAppointment);
 
                 if (! $nextAppointment) {
                     Notification::make()
@@ -90,6 +105,11 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
                 $nextAppointment->update([
                     'status' => AppointmentStatus::ONGOING,
                 ]);
+
+                Notification::make()
+                    ->title('Antrian berikutnya telah dipanggil.')
+                    ->success()
+                    ->send();
             });
     }
 
@@ -106,27 +126,19 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
         return Appointment::query()
             ->select('appointments.*')
             ->join('services', 'appointments.service_id', '=', 'services.id')
-            ->join('priorities', 'services.priority_id', '=', 'priorities.id')
-            ->with(['doctor', 'patient.user', 'service.priority', 'room'])
+
+            ->with(['doctor', 'patient.user', 'room'])
             ->where('appointments.status', $status)
             ->whereDate('appointments.scheduled_date', now()->toDateString().'')
 
             ->orderBy('appointments.scheduled_date', 'ASC')
-            ->orderBy('priorities.level', 'ASC')->count();
+
+            ->count();
     }
 
     public function render(): View
     {
-        $appointments = Appointment::query()
-            ->select('appointments.*')
-            ->join('services', 'appointments.service_id', '=', 'services.id')
-            ->join('priorities', 'services.priority_id', '=', 'priorities.id')
-            ->with(['doctor', 'patient.user', 'service.priority', 'room'])
-            ->where('appointments.status', $this->selectedStatus)
-            ->whereDate('appointments.scheduled_date', now()->toDateString().'')
-
-            ->orderBy('appointments.scheduled_date', 'ASC')
-            ->orderBy('priorities.level', 'ASC')
+        $appointments = $this->getAppontmentsQuery()
             ->paginate(5);
 
         return view($this->view, compact('appointments'));

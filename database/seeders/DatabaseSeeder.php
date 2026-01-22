@@ -8,6 +8,7 @@ use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\Room;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +24,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        $this->call(PrioritySeeder::class);
+        // $this->call(PrioritySeeder::class);
 
         User::factory()->create([
             'name' => 'Admin',
@@ -53,10 +54,15 @@ class DatabaseSeeder extends Seeder
             ->count(20)
             ->create();
 
-        // Appointment::factory()
-        //     ->count(50)
-        //     ->hasService(1)
-        //     ->create();
+        Appointment::factory()
+            ->count(50)
+            ->hasService(1)
+            ->create(
+                [
+                    'scheduled_date' => Carbon::now(),
+
+                ]
+            );
 
         // $this->call(DoctorSeeder::class);
     }

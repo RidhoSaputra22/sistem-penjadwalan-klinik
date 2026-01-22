@@ -32,28 +32,7 @@ class ServiceForm
                             ->label('Nama Kategori')
                             ->required(),
                     ]),
-                Select::make('priority_id')
-                    ->label('Prioritas')
-                    ->relationship('priority', 'name')
-                    ->searchable()
-                    ->createOptionForm([
-                        TextInput::make('name')
-                            ->label('Nama Prioritas')
-                            ->required(),
-                        TextInput::make('level')
-                            ->label('Level Prioritas')
-                            ->required(),
-                    ])
-                    ->editOptionForm([
-                        TextInput::make('name')
-                            ->label('Nama Prioritas')
-                            ->required(),
-                        TextInput::make('level')
-                            ->label('Level Prioritas')
-                            ->required(),
-                    ])
 
-                    ->preload(),
                 TextInput::make('name')
                     ->label('Nama Layanan')
                     ->required(),
