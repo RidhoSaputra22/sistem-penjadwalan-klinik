@@ -59,7 +59,7 @@ button {
 
 
     textarea {
-        @apply w-full px-3 py-2  border border-gray-300 bg-white  focus:shadow-md focus:outline-none resize-none;
+        @apply w-full px-3 py-2 mt-2 rounded-md border border-gray-300 bg-white  focus:shadow-md focus:outline-none;
     }
 
     button {

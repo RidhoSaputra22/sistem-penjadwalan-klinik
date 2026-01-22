@@ -2,7 +2,8 @@
 
 use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     //
 }; ?>
 
@@ -15,6 +16,8 @@ new class extends Component {
     @livewire('guest.service.content')
 
     {{-- End Content --}}
+
+    @livewire('guest.service.components.chat-modal')
 
 
     @livewire('layouts.footter')
