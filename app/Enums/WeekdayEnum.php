@@ -6,7 +6,6 @@ use Filament\Support\Contracts\HasLabel;
 
 enum WeekdayEnum: int implements HasLabel
 {
-    case SUNDAY = 0;
     case MONDAY = 1;
     case TUESDAY = 2;
     case WEDNESDAY = 3;
@@ -17,7 +16,6 @@ enum WeekdayEnum: int implements HasLabel
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::SUNDAY => 'Minggu',
             self::MONDAY => 'Senin',
             self::TUESDAY => 'Selasa',
             self::WEDNESDAY => 'Rabu',
@@ -27,15 +25,5 @@ enum WeekdayEnum: int implements HasLabel
         };
     }
 
-    public static function getWorkDays(): array
-    {
-        return [
-            self::MONDAY,
-            self::TUESDAY,
-            self::WEDNESDAY,
-            self::THURSDAY,
-            self::FRIDAY,
-            self::SATURDAY,
-        ];
-    }
+
 }

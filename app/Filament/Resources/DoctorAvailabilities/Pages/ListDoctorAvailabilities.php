@@ -34,9 +34,7 @@ class ListDoctorAvailabilities extends ListRecords
                         ->required(),
                     FieldRangePicker::make('jadwal_range')
                         ->label('Pilih Hari Kerja')
-                        ->options(collect(WeekdayEnum::getWorkDays())->mapWithKeys(fn (WeekdayEnum $enum) => [
-                            strtolower($enum->name) => $enum->getLabel(),
-                        ])->toArray())
+                        ->options(WeekdayEnum::class)
 
                         ->required(),
                     FieldRangePicker::make('time_range')
@@ -47,7 +45,7 @@ class ListDoctorAvailabilities extends ListRecords
 
                 ])
                 ->action(function (array $data) {
-                    // dd($data);
+                    dd($data);
 
                     $generator = new DoctorAvailabilityGenerator;
 
@@ -58,6 +56,7 @@ class ListDoctorAvailabilities extends ListRecords
                             ->success()
                             ->title($response['message'])
                             ->send();
+
                     } else {
                         Notification::make()
                             ->warning()
@@ -65,6 +64,9 @@ class ListDoctorAvailabilities extends ListRecords
                             ->send();
                         $this->halt();
                     }
+
+                    // refresh the page to show new data
+                    $this->redirect(static::getUrl());
                 })
                 ->modalHeading('Buat Jadwal Dokter')
                 ->modalDescription('Isi data dibawah untuk membuat jadwal'),

@@ -16,12 +16,12 @@ class DoctorAvailabilityGenerator
                 $data->delete();
             }
 
-            foreach ($hariRange as $key => $hari) {
+            foreach ($hariRange as $hari) {
                 // dd($hari, WeekdayEnum::from($key)->value);
 
                 $data = new DoctorAvailability;
                 $data->user_id = $doctorId;
-                $data->weekday = WeekdayEnum::from($key)->value;
+                $data->weekday = WeekdayEnum::from($hari)->value;
                 $data->start_time = $timeRange[0];
                 $data->end_time = $timeRange[count($timeRange) - 1];
                 $data->is_active = true;
