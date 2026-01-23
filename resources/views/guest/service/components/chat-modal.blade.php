@@ -1,8 +1,8 @@
 <?php
 
-use Livewire\Volt\Component;
 use App\Models\Service;
 use App\Services\Nlp\ServiceRecommender;
+use Livewire\Volt\Component;
 
 new class extends Component
 {
@@ -40,12 +40,13 @@ new class extends Component
         if ($services->isEmpty()) {
             $this->recommendations = [];
             $this->recommendationMessage = 'Belum ada data layanan untuk direkomendasikan.';
+
             return;
         }
 
         $documents = $services
             ->map(function (Service $s) {
-                $text = trim(($s->name ?? '') . ' ' . ($s->description ?? ''));
+                $text = trim(($s->name ?? '').' '.($s->description ?? ''));
 
                 return [
                     'id' => $s->id,
@@ -60,7 +61,7 @@ new class extends Component
             ->values()
             ->all();
 
-        $ranked = (new ServiceRecommender())->rank($this->keluhan, $documents, limit: 3, minScore: 0.08);
+        $ranked = (new ServiceRecommender)->rank($this->keluhan, $documents, limit: 3, minScore: 0.08);
 
         $this->recommendations = collect($ranked)
             ->filter(fn ($r) => isset($r['meta']) && is_array($r['meta']))
@@ -82,7 +83,7 @@ new class extends Component
 
 <div x-data="{ isOpen: @entangle('isOpen') }">
     <button type="button" x-cloak x-show="!isOpen" @click="isOpen = true"
-        class="fixed bottom-6 right-6 z-40 bg-primary text-white px-5 py-3 rounded-full shadow-lg hover:opacity-90">
+        class="fixed bottom-6 right-6 z-40 bg-blue-600 text-white px-5 py-3 rounded-full shadow-lg hover:opacity-90">
         Chat Keluhan
     </button>
 
@@ -108,34 +109,34 @@ new class extends Component
         @endcomponent
 
         @if($recommendationMessage)
-            <div class="mt-4 p-3 border border-gray-200 bg-gray-50 rounded-md text-sm font-light">
-                {{ $recommendationMessage }}
-            </div>
+        <div class="mt-4 p-3 border border-gray-200 bg-gray-50 rounded-md text-sm font-light">
+            {{ $recommendationMessage }}
+        </div>
         @endif
 
         @if(!empty($recommendations))
-            <div class="mt-4 space-y-3">
-                @foreach($recommendations as $rec)
-                    <div class="p-4 border border-gray-200 rounded-lg bg-white">
-                        <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <div class="font-semibold text-gray-900">{{ $rec['name'] }}</div>
-                                @if(!empty($rec['description']))
-                                    <div class="mt-1 text-sm font-light text-gray-600">
-                                        {{ \Illuminate\Support\Str::limit($rec['description'], 140) }}
-                                    </div>
-                                @endif
-                            </div>
-                            @if(!empty($rec['slug']))
-                                <a href="{{ route('guest.booking', ['slug' => $rec['slug']]) }}"
-                                    class="shrink-0 text-primary font-medium text-sm">
-                                    Booking →
-                                </a>
-                            @endif
+        <div class="mt-4 space-y-3">
+            @foreach($recommendations as $rec)
+            <div class="p-4 border border-gray-200 rounded-lg bg-white">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <div class="font-semibold text-gray-900">{{ $rec['name'] }}</div>
+                        @if(!empty($rec['description']))
+                        <div class="mt-1 text-sm font-light text-gray-600">
+                            {{ \Illuminate\Support\Str::limit($rec['description'], 140) }}
                         </div>
+                        @endif
                     </div>
-                @endforeach
+                    @if(!empty($rec['slug']))
+                    <a href="{{ route('guest.booking', ['slug' => $rec['slug']]) }}"
+                        class="shrink-0 text-primary font-medium text-sm">
+                        Booking →
+                    </a>
+                    @endif
+                </div>
             </div>
+            @endforeach
+        </div>
         @endif
 
         <div class="flex justify-end">
