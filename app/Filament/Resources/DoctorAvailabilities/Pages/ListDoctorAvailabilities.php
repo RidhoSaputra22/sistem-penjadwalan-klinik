@@ -45,7 +45,7 @@ class ListDoctorAvailabilities extends ListRecords
 
                 ])
                 ->action(function (array $data) {
-                    dd($data);
+                    // dd($data);
 
                     $generator = new DoctorAvailabilityGenerator;
 
