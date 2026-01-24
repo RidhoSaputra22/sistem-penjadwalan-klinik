@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\GuestController;
+use App\Mail\ConfirmBooking;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -27,3 +30,17 @@ Route::post('/logout', function () {
 Route::get('/laporan/booking/AWT/pdf', [GuestController::class, 'generateAWTBookingReportPdf'])->name('reports.booking.awt.booking.pdf');
 Route::get('/laporan/booking/TAT/pdf', [GuestController::class, 'generateTATBookingReportPdf'])->name('reports.booking.tat.booking.pdf');
 Route::get('/laporan/booking/ALL/pdf', [GuestController::class, 'generateALLBookingReportPdf'])->name('reports.booking.all.booking.pdf');
+
+Route::get('/test-mail', function () {
+
+    $user = User::firstOrCreate([
+        'email' => 'saputra22022@gmail.com',
+    ], [
+        'name' => 'Test User',
+        'password' => bcrypt('password'),
+    ]);
+
+    Mail::to($user->email)->send(new ConfirmBooking);
+
+    return 'Sent to saputra22022@gmail.com';
+});

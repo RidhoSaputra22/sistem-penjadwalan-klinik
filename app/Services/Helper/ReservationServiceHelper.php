@@ -4,8 +4,15 @@ namespace App\Services\Helper;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\NotificationType;
-use App\Jobs\SendWhatsAppBookingMessage;
-use App\Models\{Appointment, Doctor, DoctorAvailability, Holiday, Patient, Room, Service, SesiPertemuan, User};
+use App\Models\Appointment;
+use App\Models\Doctor;
+use App\Models\DoctorAvailability;
+use App\Models\Holiday;
+use App\Models\Patient;
+use App\Models\Room;
+use App\Models\Service;
+use App\Models\SesiPertemuan;
+use App\Models\User;
 use App\Notifications\GenericDatabaseNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -169,7 +176,7 @@ class ReservationServiceHelper
     }
 
     /**
-     * @param string[] $slotTimes
+     * @param  string[]  $slotTimes
      * @return array{0: Carbon, 1: Carbon}
      */
     public static function getOperationalWindow(string $date, array $slotTimes, int $durationMinutes, string $tz = self::TZ): array
@@ -222,7 +229,7 @@ class ReservationServiceHelper
     }
 
     /**
-     * @param Collection<int, DoctorAvailability> $doctorAvailabilities
+     * @param  Collection<int, DoctorAvailability>  $doctorAvailabilities
      */
     private static function doctorHasAvailability(Collection $doctorAvailabilities, string $slotStartTime, string $slotEndTime): bool
     {
@@ -413,20 +420,6 @@ class ReservationServiceHelper
         ));
     }
 
-    public static function dispatchWhatsAppIfPossible(Appointment $booking): void
-    {
-        $email = (string) ($booking->patient?->user?->email ?? '');
-        if (trim($email) === '') {
-            return;
-        }
-
-        SendWhatsAppBookingMessage::dispatch(
-            userEmail: $email,
-            bookingCode: (string) $booking->code,
-            paketSlug: (string) ($booking->service?->slug ?? ''),
-        );
-    }
-
     public static function resolveOrCreateUser(string $name, ?string $email, string $phone): User
     {
         $hp = trim($phone);
@@ -434,7 +427,7 @@ class ReservationServiceHelper
 
         $resolvedEmail = $email;
         if (! is_string($resolvedEmail) || $resolvedEmail === '') {
-            $resolvedEmail = 'guest+' . $hpDigits . '@example.test';
+            $resolvedEmail = 'guest+'.$hpDigits.'@example.test';
         }
 
         $existing = User::query()
@@ -449,14 +442,14 @@ class ReservationServiceHelper
         $uniqueEmail = $resolvedEmail;
         $counter = 2;
         while (User::query()->where('email', $uniqueEmail)->exists()) {
-            $uniqueEmail = 'guest+' . $hpDigits . '+' . $counter . '@example.test';
+            $uniqueEmail = 'guest+'.$hpDigits.'+'.$counter.'@example.test';
             $counter++;
         }
 
         $uniqueHp = $hp !== '' ? $hp : $hpDigits;
         $hpCounter = 2;
         while (User::query()->where('hp', $uniqueHp)->exists()) {
-            $uniqueHp = $hpDigits . '-' . $hpCounter;
+            $uniqueHp = $hpDigits.'-'.$hpCounter;
             $hpCounter++;
         }
 
@@ -489,7 +482,7 @@ class ReservationServiceHelper
                     continue;
                 }
 
-                $scheduledDate = Carbon::parse($date->toDateString() . ' ' . $slot['time'], $tz);
+                $scheduledDate = Carbon::parse($date->toDateString().' '.$slot['time'], $tz);
                 $assignment = self::findAvailableAssignment($scheduledDate, $durationMinutes, $excludeAppointmentId);
                 if ($assignment) {
                     return $assignment;
@@ -529,7 +522,7 @@ class ReservationServiceHelper
                 : null;
 
             $bStart = ($bDateString && $b->scheduled_start)
-                ? Carbon::parse($bDateString . ' ' . $b->scheduled_start, $tz)
+                ? Carbon::parse($bDateString.' '.$b->scheduled_start, $tz)
                 : null;
 
             if (! $bStart) {
@@ -537,7 +530,7 @@ class ReservationServiceHelper
             }
 
             $bEnd = ($bDateString && $b->scheduled_end)
-                ? Carbon::parse($bDateString . ' ' . $b->scheduled_end, $tz)
+                ? Carbon::parse($bDateString.' '.$b->scheduled_end, $tz)
                 : null;
 
             if (! $bEnd) {

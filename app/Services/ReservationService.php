@@ -2,26 +2,20 @@
 
 namespace App\Services;
 
-use App\Models\{
-    Appointment,
-    Patient,
-    Doctor,
-    User,
-    Holiday,
-    Room,
-    Service,
-};
 use App\Enums\AppointmentStatus;
 use App\Enums\NotificationType;
-use App\Jobs\SendWhatsAppBookingMessage;
+use App\Models\Appointment;
+use App\Models\Holiday;
+use App\Models\Service;
+use App\Models\User;
 use App\Notifications\GenericDatabaseNotification;
 use App\Services\Helper\ReservationServiceHelper;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Midtrans\Config as MidtransConfig;
 use Midtrans\Snap;
-use Carbon\Carbon;
 
 class ReservationService
 {
@@ -29,7 +23,11 @@ class ReservationService
 
     public function __construct()
     {
-        // Konfigurasi Midtrans
+        // Midtrans configuration is done lazily (only when needed)
+    }
+
+    private function ensureMidtransConfigured(): void
+    {
         $serverKey = (string) config('services.midtrans.server_key', '');
         if (trim($serverKey) === '') {
             throw new \RuntimeException('MIDTRANS_SERVER_KEY belum diset. Pastikan MIDTRANS_SERVER_KEY & MIDTRANS_CLIENT_KEY ada di .env, lalu jalankan `php artisan config:clear`.');
@@ -39,6 +37,51 @@ class ReservationService
         MidtransConfig::$isProduction = (bool) config('services.midtrans.is_production', false);
         MidtransConfig::$isSanitized = (bool) config('services.midtrans.is_sanitized', true);
         MidtransConfig::$is3ds = (bool) config('services.midtrans.is_3ds', true);
+    }
+
+    /**
+     * Wrapper methods to make helper-dependent logic testable.
+     */
+    protected function availableTimeSlots(
+        ?string $date,
+        int $durationMinutes,
+        ?int $roomId = null,
+        ?int $doctorId = null,
+        ?int $excludeAppointmentId = null,
+    ): array {
+        return ReservationServiceHelper::getAvailableTimeSlots(
+            date: $date,
+            durationMinutes: $durationMinutes,
+            roomId: $roomId,
+            doctorId: $doctorId,
+            excludeAppointmentId: $excludeAppointmentId,
+        );
+    }
+
+    protected function findAvailableAssignment(
+        Carbon $scheduledDate,
+        int $durationMinutes,
+        ?int $excludeAppointmentId = null,
+    ): ?array {
+        return ReservationServiceHelper::findAvailableAssignment(
+            scheduledDate: $scheduledDate,
+            durationMinutes: $durationMinutes,
+            excludeAppointmentId: $excludeAppointmentId,
+        );
+    }
+
+    protected function findNextAvailableAssignment(
+        Carbon $startDate,
+        int $durationMinutes,
+        ?int $excludeAppointmentId = null,
+        int $maxDays = 30,
+    ): ?array {
+        return ReservationServiceHelper::findNextAvailableAssignment(
+            startDate: $startDate,
+            durationMinutes: $durationMinutes,
+            excludeAppointmentId: $excludeAppointmentId,
+            maxDays: $maxDays,
+        );
     }
 
     public static function getAvailableTimeSlots(
@@ -67,7 +110,6 @@ class ReservationService
      *     service_id: int,
      *     scheduled_date?: string|null
      * } $data
-     *
      * @return array{
      *     booking: \App\Models\Appointment,
      *     snap_token: string
@@ -76,9 +118,10 @@ class ReservationService
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      * @throws \Throwable
      */
-
     public function createReservation(array $data)
     {
+        $this->ensureMidtransConfigured();
+
         return DB::transaction(function () use ($data) {
             $name = (string) ($data['name'] ?? 'Customer');
             $email = $data['email'] ?? null;
@@ -112,7 +155,7 @@ class ReservationService
             $date = $scheduledAt->toDateString();
             $time = $scheduledAt->format('H:i');
 
-            $slots = ReservationServiceHelper::getAvailableTimeSlots(
+            $slots = $this->availableTimeSlots(
                 date: $date,
                 durationMinutes: $durationMinutes,
             );
@@ -304,7 +347,7 @@ class ReservationService
         $date = $scheduledAt->toDateString();
         $time = $scheduledAt->format('H:i');
 
-        $slots = self::getAvailableTimeSlots(
+        $slots = $this->availableTimeSlots(
             date: $date,
             durationMinutes: $durationMinutes,
             excludeAppointmentId: (int) $booking->id,
@@ -320,7 +363,7 @@ class ReservationService
             ];
         }
 
-        $assignment = ReservationServiceHelper::findAvailableAssignment(
+        $assignment = $this->findAvailableAssignment(
             scheduledDate: $scheduledAt,
             durationMinutes: $durationMinutes,
             excludeAppointmentId: (int) $booking->id,
@@ -365,7 +408,7 @@ class ReservationService
 
         $booking->refresh()->loadMissing(['patient.user', 'doctor', 'room', 'service']);
 
-        $formatted = Carbon::parse($assignment['scheduled_date'] . ' ' . $assignment['scheduled_start'], $tz)
+        $formatted = Carbon::parse($assignment['scheduled_date'].' '.$assignment['scheduled_start'], $tz)
             ->format('d-m-Y H:i');
 
         $booking->patient?->user?->notify(new GenericDatabaseNotification(
@@ -483,15 +526,15 @@ class ReservationService
             : null;
 
         $scheduledDate = ($dateString && $booking->scheduled_start)
-            ? Carbon::parse($dateString . ' ' . $booking->scheduled_start, $tz)
+            ? Carbon::parse($dateString.' '.$booking->scheduled_start, $tz)
             : null;
 
         $assignment = $scheduledDate
-            ? ReservationServiceHelper::findAvailableAssignment($scheduledDate, $durationMinutes, $booking->id)
+            ? $this->findAvailableAssignment($scheduledDate, $durationMinutes, $booking->id)
             : null;
 
         if (! $assignment) {
-            $assignment = ReservationServiceHelper::findNextAvailableAssignment(
+            $assignment = $this->findNextAvailableAssignment(
                 startDate: Carbon::now($tz)->addDay()->startOfDay(),
                 durationMinutes: $durationMinutes,
                 excludeAppointmentId: $booking->id,
@@ -508,6 +551,7 @@ class ReservationService
                     'code' => $booking->code,
                 ],
             ));
+
             return;
         }
 
@@ -523,11 +567,10 @@ class ReservationService
 
         $booking->refresh()->loadMissing(['patient.user', 'service']);
 
-        $formatted = Carbon::parse($assignment['scheduled_date'] . ' ' . $assignment['scheduled_start'], $tz)
+        $formatted = Carbon::parse($assignment['scheduled_date'].' '.$assignment['scheduled_start'], $tz)
             ->format('d-m-Y H:i');
 
         ReservationServiceHelper::notifyBookingScheduled($booking, $formatted);
         ReservationServiceHelper::notifyDoctorScheduled((int) $assignment['doctor_user_id'], $booking, $formatted);
-        ReservationServiceHelper::dispatchWhatsAppIfPossible($booking);
     }
 }

@@ -7,8 +7,31 @@ use Illuminate\Support\Facades\Http;
 
 class WhatsAppServices
 {
+    private static function apiUrl(): string
+    {
+        return (string) config('services.whatsapp.api_url', 'http://127.0.0.1:5000/send');
+    }
 
-    private const API_URL = 'http://127.0.0.1:5000/send';
+    /**
+     * @param  array<string,mixed>  $payload
+     * @return array<string,mixed>
+     */
+    public static function sendPayload(array $payload): array
+    {
+        /** @var \Illuminate\Http\Client\Response $response */
+        $response = Http::timeout(30)
+            ->acceptJson()
+            ->asJson()
+            ->post(self::apiUrl(), $payload);
+
+        if ($response->failed()) {
+            throw new Exception('Failed to send message: ' . $response->body());
+        }
+
+        $json = $response->json();
+
+        return is_array($json) ? $json : ['response' => $json];
+    }
 
     /**
      * Mengirim/menangani pesan WhatsApp berdasarkan payload JSON dari proses reservasi.
@@ -34,16 +57,6 @@ class WhatsAppServices
             'paket_slug' => $paketSlug
         ];
 
-        $response = Http::timeout(30)
-            ->acceptJson()
-            ->asJson()
-            ->post(self::API_URL, $payload);
-
-        if ($response->failed()) {
-            // Handle error
-            throw new Exception('Failed to send message: ' . $response->body());
-        }
-
-        return $response->json();
+        return self::sendPayload($payload);
     }
 }

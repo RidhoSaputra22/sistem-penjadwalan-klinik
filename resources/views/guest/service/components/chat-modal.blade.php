@@ -63,6 +63,7 @@ new class extends Component
             ->all();
 
         $ranked = (new ServiceRecommender)->rank($this->keluhan, $documents, limit: 3, minScore: 0.08);
+        dd($ranked);
 
         $recomendtId = collect($ranked)
             ->filter(fn ($r) => isset($r['meta']) && is_array($r['meta']))
@@ -85,7 +86,7 @@ new class extends Component
 
 <div x-data="{ isOpen: @entangle('isOpen') }">
     <button type="button" x-cloak x-show="!isOpen" @click="isOpen = true"
-        class="fixed bottom-6 right-6 z-40 bg-blue-700 text-white rounded-bl-xl rounded-tl-xl rounded-tr-xl shadow-lg hover:opacity-90">
+        class="fixed bottom-6 right-6 z-40 bg-blue-700 text-white rounded-bl-xl rounded-tl-xl rounded-tr-xl shadow-lg hover:bg-blue-800 transition">
         <div class="flex items-center gap-3 px-5 py-3">
             @include('components.icons.chat-bubble')
             Chat Keluhan Kamu disini

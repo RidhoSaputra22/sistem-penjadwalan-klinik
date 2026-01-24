@@ -36,24 +36,6 @@ def get_bot() -> WhatsAppBot:
         )
     return _bot
 
-# ==========================
-# TEMPLATE
-# ==========================
-MESSAGE_TEMPLATE = """Halo {{nama_klien}},
-
-Terima kasih telah melakukan reservasi di Klinik Goaria.
-Reservasi Anda berhasil dibuat dan saat ini telah tercatat dalam sistem kami.
-
-📅 Tanggal: {{tanggal}}
-⏰ Waktu: {{waktu}}
-📸 Layanan/Paket: {{nama_paket}}
-📸 Kode Booking: {{kode_booking}}
-📍 Lokasi: {{lokasi}}
-Tim kami akan melakukan konfirmasi lanjutan sesuai jadwal yang telah Anda pilih. Mohon pastikan data reservasi sudah sesuai. Jika terdapat pertanyaan atau perubahan, jangan ragu untuk menghubungi kami melalui WhatsApp ini.
-
-Terima kasih atas kepercayaan Anda.
-Klinik Goaria
-"""
 
 # ==========================
 # DEBUG HELPERS
@@ -86,87 +68,6 @@ def normalize_phone(phone: str) -> str:
         return phone[1:]
     return phone
 
-def get_user_by_email(user_email: str) -> dict | None:
-    log(f"DB: Fetching user {user_email}", "DB")
-    conn = Database.get_connection()
-    cursor = None
-
-    try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-                SELECT name, phone
-            FROM users
-            WHERE email = %s
-        """, (user_email,))
-        result = cursor.fetchone()
-        log(f"DB: User result → {result}", "DB")
-        return result
-
-    finally:
-        if cursor:
-            cursor.close()
-        conn.close()
-
-
-def get_booking_by_code(booking_code: str) -> dict | None:
-    log(f"DB: Fetching booking {booking_code}", "DB")
-    conn = Database.get_connection()
-    cursor = None
-
-    try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-                SELECT scheduled_date, code
-            FROM appointments
-            WHERE code = %s && status = 'confirmed'
-        """, (booking_code,))
-        result = cursor.fetchone()
-        log(f"DB: Booking result → {result}", "DB")
-        return result
-
-    finally:
-        if cursor:
-            cursor.close()
-        conn.close()
-
-
-def get_paket_by_slug(paket_slug: str) -> dict | None:
-    log(f"DB: Fetching paket {paket_slug}", "DB")
-    conn = Database.get_connection()
-    cursor = None
-
-    try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT name
-            FROM services
-            WHERE slug = %s
-        """, (paket_slug,))
-        result = cursor.fetchone()
-        log(f"DB: Paket result → {result}", "DB")
-        return result
-
-    finally:
-        if cursor:
-            cursor.close()
-        conn.close()
-
-
-# ==========================
-# MESSAGE RENDERING
-# ==========================
-def render_message_template(message_template: str, booking: dict, paket: dict, user: dict) -> str: # establish database connection
-    log("Rendering message template", "debug")
-    rendered_message = message_template
-    rendered_message = rendered_message.replace("{{nama_klien}}", user['name'])
-    rendered_message = rendered_message.replace("{{tanggal}}", booking['scheduled_date'].strftime("%d-%m-%Y"))
-    rendered_message = rendered_message.replace("{{waktu}}", f"{booking['scheduled_date'].strftime('%H:%M')}")
-    rendered_message = rendered_message.replace("{{nama_paket}}", str(paket['name']))
-    rendered_message = rendered_message.replace("{{kode_booking}}", f"{booking['code']}")
-    rendered_message = rendered_message.replace("{{lokasi}}", MONOPIC_ADDRESS)
-    return rendered_message
-
-
 
 # ==========================
 # ROUTES
@@ -174,37 +75,28 @@ def render_message_template(message_template: str, booking: dict, paket: dict, u
 @app.route("/send", methods=["POST"])
 def send_whatsapp():
     # json payload: {
-    #   "user_email": string,
-    #   "booking_code": string,
-    #   "paket_slug": string
+    #   "phone": "string",
+    #   "message": "string"
     # }
     try:
         data = request.get_json(force=True)
         log(f"Payload → {data}", "PAYLOAD")
 
-        user_email = data.get("user_email")
-        booking_code = data.get("booking_code")
-        paket_slug = data.get("paket_slug")
+        phone = data.get("phone")
+        message = data.get("message")
 
-
-
-        user = get_user_by_email(user_email)
-        booking = get_booking_by_code(booking_code)
-        paket = get_paket_by_slug(paket_slug)
-
-        if not user or not booking or not paket:
-            log("Data validation failed", "ERROR")
+        if not phone or not message:
+            log("Missing 'phone' or 'message' in payload", "ERROR")
             return jsonify({
                 "status": "error",
-                "message": "User / Booking / Paket not found"
-            }), 404
+                "request_id": g.request_id,
+                "message": "Missing 'phone' or 'message' in payload"
+            }), 400
 
-        message = render_message_template(message_template=MESSAGE_TEMPLATE, user=user, booking=booking, paket=paket)
-
-        phone_number = normalize_phone(user["phone"])
+        phone_number = normalize_phone(phone)
         log(f"Normalized phone → {phone_number}", "WA")
 
-        logo_path = IMAGE_BASE_PATH / "logo.png"
+        logo_path = IMAGE_BASE_PATH / "logo.jpg"
         if not logo_path.is_file():
             raise FileNotFoundError(f"Logo image not found at {logo_path}")
 

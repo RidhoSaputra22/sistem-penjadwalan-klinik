@@ -104,4 +104,21 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasOne(Patient::class, 'user_id');
     }
+
+    /**
+     * Route notifications for the WhatsApp channel.
+     *
+     * Current WhatsApp sender service expects a user email.
+     */
+    public function routeNotificationForWhatsapp(): ?string
+    {
+        $email = is_string($this->email) ? trim($this->email) : '';
+        if ($email !== '') {
+            return $email;
+        }
+
+        $phone = is_string($this->phone) ? trim($this->phone) : '';
+
+        return $phone !== '' ? $phone : null;
+    }
 }

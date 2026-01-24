@@ -22,7 +22,6 @@ class DoctorAvailabilityFactory extends Factory
         return [
             'user_id' => User::factory()->state(fn () => ['role' => UserRole::DOCTOR]),
             'weekday' => fake()->randomElement([
-                WeekdayEnum::SUNDAY,
                 WeekdayEnum::MONDAY,
                 WeekdayEnum::TUESDAY,
                 WeekdayEnum::WEDNESDAY,

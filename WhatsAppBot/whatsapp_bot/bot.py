@@ -27,7 +27,7 @@ def _get_chromedriver_path():
 class WhatsAppBot:
     """
     WhatsApp Web Automation Bot
-    
+
     Usage with context manager (recommended):
         with WhatsAppBot() as bot:
             bot.open_chat("628123456789")
@@ -82,7 +82,7 @@ class WhatsAppBot:
         self.logger.debug("Initializing Chrome driver")
 
         options = Options()
-        
+
         # Use provided binary path or try OS-specific default locations
         if self.chrome_binary:
             options.binary_location = self.chrome_binary
@@ -103,6 +103,7 @@ class WhatsAppBot:
                 '/usr/bin/google-chrome',  # Linux
                 '/usr/bin/chromium-browser',  # Linux
                 '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',  # macOS
+
             ]
             for path in possible_paths:
                 if os.path.exists(path):
@@ -167,7 +168,7 @@ class WhatsAppBot:
         except Exception:
             self.logger.error("Message input box not found")
             raise RuntimeError("Cannot find message input box")
-    
+
     def _get_send_button(self):
         self.logger.debug("Locating send button")
         return self._get_wait().until(
@@ -185,7 +186,7 @@ class WhatsAppBot:
         url = f"https://web.whatsapp.com/send?phone={phone_number}"
         self.logger.info(f"Opening chat: {phone_number}")
         self.driver.get(url)
-        
+
         # Clear element cache when navigating to new chat
         self._element_cache.clear()
 
@@ -205,7 +206,7 @@ class WhatsAppBot:
         self.logger.debug(f"Typing message: {message}")
         box = self._get_message_box()
         box.send_keys(message)
-        
+
     def paste_message(self, message: str):
         self.logger.debug(f"Pasting message: {message}")
         utils.copy_text_to_clipboard(message)
@@ -223,7 +224,7 @@ class WhatsAppBot:
             self.logger.debug("Sending message with attachments")
             send_button = self._get_send_button()
             send_button.click()
-        else:    
+        else:
             self.logger.debug("Sending message")
             self._get_message_box().send_keys(Keys.ENTER)
             self.logger.info("Message sent")
@@ -261,11 +262,11 @@ class WhatsAppBot:
             self.driver = None
             # Clear cached WebDriverWait to prevent stale driver references
             self._wait_cache = None
-    
+
     def __enter__(self):
         """Context manager entry."""
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit with automatic cleanup."""
         self.close()
