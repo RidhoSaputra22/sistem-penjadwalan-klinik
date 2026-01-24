@@ -18,7 +18,7 @@ class ServiceSeeder extends Seeder
         ]);
 
         Category::factory()->create([
-            'name' => 'Konsultasi Ortodontik',
+            'name' => 'Kontrol Ortodontik',
         ]);
 
         $services = [
@@ -90,7 +90,7 @@ class ServiceSeeder extends Seeder
             // KONTROL BEHEL
             // =======================
             [
-                'category_id' => 1,
+                'category_id' => 2,
                 'name' => 'Kontrol Behel Metal',
                 'slug' => 'kontrol-behel-metal',
                 'code' => 'ORTHO-KONTROL-METAL',
@@ -100,7 +100,7 @@ class ServiceSeeder extends Seeder
                 'color' => '#9E9E9E',
             ],
             [
-                'category_id' => 1,
+                'category_id' => 2,
                 'name' => 'Kontrol Behel Ceramic',
                 'slug' => 'kontrol-behel-ceramic',
                 'code' => 'ORTHO-KONTROL-CERAMIC',
@@ -110,7 +110,7 @@ class ServiceSeeder extends Seeder
                 'color' => '#E0E0E0',
             ],
             [
-                'category_id' => 1,
+                'category_id' => 2,
                 'name' => 'Kontrol Behel Damon Metal',
                 'slug' => 'kontrol-behel-damon-metal',
                 'code' => 'ORTHO-KONTROL-DAMON-METAL',
@@ -120,7 +120,7 @@ class ServiceSeeder extends Seeder
                 'color' => '#607D8B',
             ],
             [
-                'category_id' => 1,
+                'category_id' => 2,
                 'name' => 'Kontrol Behel Damon Clear',
                 'slug' => 'kontrol-behel-damon-clear',
                 'code' => 'ORTHO-KONTROL-DAMON-CLEAR',
@@ -130,7 +130,7 @@ class ServiceSeeder extends Seeder
                 'color' => '#CFD8DC',
             ],
             [
-                'category_id' => 1,
+                'category_id' => 2,
                 'name' => 'Kontrol Behel Damon Ultima',
                 'slug' => 'kontrol-behel-damon-ultima',
                 'code' => 'ORTHO-KONTROL-DAMON-ULTIMA',
@@ -140,7 +140,7 @@ class ServiceSeeder extends Seeder
                 'color' => '#455A64',
             ],
             [
-                'category_id' => 1,
+                'category_id' => 2,
                 'name' => 'Kontrol Behel Self Ligating Metal',
                 'slug' => 'kontrol-behel-self-ligating-metal',
                 'code' => 'ORTHO-KONTROL-SL-METAL',

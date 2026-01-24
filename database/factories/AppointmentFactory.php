@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\PaymentStatusEnum;
 use App\Enums\UserRole;
 use App\Models\Patient;
 use App\Models\Room;
@@ -21,6 +22,28 @@ class AppointmentFactory extends Factory
     {
         $scheduledDate = fake()->dateTimeBetween('-1 month', '+2 months');
         $serviceDuration = fake()->randomElement([15, 20, 30, 45, 60, 90]);
+
+        $paymentStatus = fake()->randomElement([
+            PaymentStatusEnum::UNPAID,
+            PaymentStatusEnum::UNPAID,
+            PaymentStatusEnum::DP,
+            PaymentStatusEnum::PAID,
+            PaymentStatusEnum::PAID,
+            PaymentStatusEnum::REFUNDED,
+            PaymentStatusEnum::FAILED,
+        ]);
+
+        $dpAmount = null;
+        $dpPercentage = null;
+
+        if ($paymentStatus === PaymentStatusEnum::DP) {
+            // Salah satu bisa terisi; dibiarkan fleksibel untuk kebutuhan bisnis.
+            if (fake()->boolean(60)) {
+                $dpPercentage = fake()->randomFloat(2, 5, 50);
+            } else {
+                $dpAmount = fake()->randomFloat(2, 50000, 500000);
+            }
+        }
 
         $start = Carbon::instance($scheduledDate)->setTime(fake()->numberBetween(8, 15), fake()->randomElement([0, 15, 30, 45]), 0);
         $end = (clone $start)->addMinutes($serviceDuration);
@@ -42,6 +65,9 @@ class AppointmentFactory extends Factory
                 AppointmentStatus::CANCELLED,
             ]),
             'snap_token' => fake()->optional()->sha1(),
+            'payment_status' => $paymentStatus,
+            'dp_amount' => $dpAmount,
+            'dp_percentage' => $dpPercentage,
             'notes' => fake()->optional()->sentence(),
         ];
     }

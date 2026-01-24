@@ -52,6 +52,15 @@ class AppointmentsTable
                 TextColumn::make('status')
                     ->label('Statu')
                     ->badge(),
+                TextColumn::make('payment_status')
+                    ->label('Pembayaran')
+                    ->badge(),
+                TextColumn::make('dp_amount')
+                    ->label('DP (Rp)')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('dp_percentage')
+                    ->label('DP (%)')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -74,6 +83,7 @@ class AppointmentsTable
             ])
             ->groups([
                 Group::make('status'),
+                Group::make('payment_status'),
                 Group::make('doctor.name'),
                 Group::make('service.name'),
             ]);

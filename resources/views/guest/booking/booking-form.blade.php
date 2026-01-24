@@ -1,23 +1,27 @@
 <?php
 
+use App\Models\Service;
 use Carbon\Carbon;
-use App\Models\Package;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Volt\Component;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Service;
 
-new class extends Component {
+new class extends Component
+{
     //
     public Service $service;
 
     public string $name = '';
+
     public string $email = '';
+
     public string $phone = '';
 
     public ?string $booking_date = null;
+
     public ?string $booking_time = null;
 
+    public ?string $selected_dp = '0.25';
 
     public function mount(): void
     {
@@ -29,7 +33,6 @@ new class extends Component {
             $this->phone = $this->phone ?: ($user->phone ?? '');
         }
     }
-
 
     #[On('date-time-selected')]
     public function setDateTime($data)
@@ -54,12 +57,16 @@ new class extends Component {
         session()->flash('success', 'Reservasi berhasil dibuat!');
     }
 
-
+    public function selectDp(string $dp)
+    {
+        $this->selected_dp = $dp;
+    }
 
     public function submitForm(): void
     {
         if (! Auth::check()) {
             session()->flash('error', 'Silakan login terlebih dahulu untuk melakukan reservasi.');
+
             return;
         }
 
@@ -68,23 +75,26 @@ new class extends Component {
             'phone' => 'required|string|max:20',
             'booking_date' => 'required|date_format:Y-m-d',
             'booking_time' => 'required|date_format:H:i',
+            'selected_dp' => 'required|in:0.25,0.5',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'phone.required' => 'Nomor telepon wajib diisi.',
             'booking_date.required' => 'Tanggal reservasi wajib diisi.',
             'booking_time.required' => 'Waktu reservasi wajib diisi.',
+            'selected_dp.required' => 'Silakan pilih DP (25% atau 50%).',
         ]);
 
         try {
             $tz = 'Asia/Makassar';
             $scheduledDate = Carbon::parse("{$this->booking_date} {$this->booking_time}", $tz);
 
-            $reservationService = new \App\Services\ReservationService();
+            $reservationService = new \App\Services\ReservationService;
             $result = $reservationService->createReservation([
                 'name' => $this->name,
                 'phone' => $this->phone,
                 'service_id' => $this->service->id,
                 'scheduled_date' => $scheduledDate,
+                'dp_ratio' => $this->selected_dp,
 
             ]);
 
@@ -96,17 +106,10 @@ new class extends Component {
             $this->dispatch('booking-created');
         } catch (\Throwable $e) {
             report($e);
-            $this->addError('form', 'Terjadi kesalahan saat menyimpan reservasi. Silakan coba lagi.' . $e->getMessage());
+            $this->addError('form', 'Terjadi kesalahan saat menyimpan reservasi. Silakan coba lagi.'.$e->getMessage());
         }
 
-
-
-
     }
-
-
-
-
 }; ?>
 
 <div>
@@ -186,6 +189,25 @@ new class extends Component {
             @endif
         </div>
 
+        <div x-data="{ selectedDp: @entangle('selected_dp') }">
+            <h1 class="font-light pb-2">Uang Muka (DP)</h1>
+            <div class=" grid grid-cols-2 gap-5">
+                @php
+                $dpOptions = [
+                '0.25' => '25%',
+                '0.5' => '50%',
+                ];
+                @endphp
+                @foreach ($dpOptions as $value => $label)
+                <div @click="$wire.selectDp('{{ $value }}')"
+                    class="flex items-center  p-3 cursor-pointer border rounded-md text-center hover:border-primary hover:bg-primary/10"
+                    :class="selectedDp === '{{ $value }}' ? 'border-primary bg-primary/10 font-medium' : ''">
+                    {{ $label }}
+                </div>
+                @endforeach
+            </div>
+        </div>
+
 
         <div>
             @component('components.form.button', [
@@ -203,69 +225,78 @@ new class extends Component {
 </div>
 
 @push('scripts')
-    @once
-        @php
-            $isProduction = (bool) config('services.midtrans.is_production', false);
-            $clientKey = (string) config('services.midtrans.client_key', '');
-            $snapBaseUrl = $isProduction
-                ? 'https://app.midtrans.com/snap/snap.js'
-                : 'https://app.sandbox.midtrans.com/snap/snap.js';
-        @endphp
+@once
+@php
+$isProduction = (bool) config('services.midtrans.is_production', false);
+$clientKey = (string) config('services.midtrans.client_key', '');
+$snapBaseUrl = $isProduction
+? 'https://app.midtrans.com/snap/snap.js'
+: 'https://app.sandbox.midtrans.com/snap/snap.js';
+@endphp
 
-        @if ($clientKey !== '')
-            <script src="{{ $snapBaseUrl }}" data-client-key="{{ $clientKey }}"></script>
-        @endif
+@if ($clientKey !== '')
+<script src=" {{ $snapBaseUrl }}" data-client-key="{{ $clientKey }}">
+</script>
+@endif
 
-        <script>
-        (function () {
-            function waitForSnap(maxMs) {
-                return new Promise(function (resolve, reject) {
-                    var start = Date.now();
-                    (function tick() {
-                        if (window.snap && typeof window.snap.pay === 'function') {
-                            return resolve();
-                        }
-                        if (Date.now() - start > maxMs) {
-                            return reject(new Error('Midtrans Snap is not available'));
-                        }
-                        setTimeout(tick, 100);
-                    })();
-                });
-            }
+<script>
+(function() {
+    function waitForSnap(maxMs) {
+        return new Promise(function(resolve, reject) {
+            var start = Date.now();
+            (function tick() {
+                if (window.snap && typeof window.snap.pay === 'function') {
+                    return resolve();
+                }
+                if (Date.now() - start > maxMs) {
+                    return reject(new Error('Midtrans Snap is not available'));
+                }
+                setTimeout(tick, 100);
+            })();
+        });
+    }
 
-            document.addEventListener('open-midtrans-snap', function (event) {
-                var detail = event && event.detail ? event.detail : {};
-                var snapToken = detail.snapToken;
-                if (!snapToken) return;
+    document.addEventListener('open-midtrans-snap', function(event) {
+        var detail = event && event.detail ? event.detail : {};
+        var snapToken = detail.snapToken;
+        if (!snapToken) return;
 
-                waitForSnap(5000)
-                    .then(function () {
-                        window.snap.pay(snapToken, {
-                            onSuccess: function (result) {
-                                Livewire.dispatch('payment-success', { payload: result || {} });
-                            },
-                            onPending: function () {
-                                window.location.reload();
-                            },
-                            onError: function () {
-                                Livewire.dispatch('payment-error', { payload: {
-                                    snapToken: snapToken
-                                } });
-                            },
-                            onClose: function (){
-                                Livewire.dispatch('payment-error', { payload: {
-                                    snapToken: snapToken
-                                } });
-
+        waitForSnap(5000)
+            .then(function() {
+                window.snap.pay(snapToken, {
+                    onSuccess: function(result) {
+                        Livewire.dispatch('payment-success', {
+                            payload: result || {}
+                        });
+                    },
+                    onPending: function() {
+                        window.location.reload();
+                    },
+                    onError: function() {
+                        Livewire.dispatch('payment-error', {
+                            payload: {
+                                snapToken: snapToken
                             }
                         });
-                    })
-                    .catch(function (err) {
-                        console.error(err);
-                        alert('Gagal memuat pembayaran. Silakan refresh halaman dan coba lagi.');
-                    });
+                    },
+                    onClose: function() {
+                        Livewire.dispatch('payment-error', {
+                            payload: {
+                                snapToken: snapToken
+                            }
+                        });
+
+                    }
+                });
+            })
+            .catch(function(err) {
+                console.error(err);
+                alert(
+                    'Gagal memuat pembayaran. Silakan refresh halaman dan coba lagi.'
+                );
             });
-        })();
-        </script>
-    @endonce
+    });
+})();
+</script>
+@endonce
 @endpush

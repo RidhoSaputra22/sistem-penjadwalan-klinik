@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\AppointmentStatus;
 use App\Enums\NotificationType;
+use App\Enums\PaymentStatusEnum;
 use App\Models\Appointment;
 use App\Models\Holiday;
 use App\Models\Service;
@@ -137,6 +138,19 @@ class ReservationService
             // Ambil Layanan
             $service = Service::findOrFail($data['service_id']);
 
+            $dpRatio = $data['dp_ratio'] ?? null;
+            $dpRatio = is_string($dpRatio) ? trim($dpRatio) : $dpRatio;
+            $dpRatioFloat = is_numeric($dpRatio) ? (float) $dpRatio : null;
+            if (! in_array($dpRatioFloat, [0.25, 0.5], true)) {
+                $dpRatioFloat = null;
+            }
+
+            $dpPercentage = $dpRatioFloat !== null ? $dpRatioFloat * 100 : null;
+            $servicePrice = is_numeric($service->price) ? (float) $service->price : 0.0;
+            $dpAmount = ($dpRatioFloat !== null && $servicePrice > 0)
+                ? round($servicePrice * $dpRatioFloat, 2)
+                : null;
+
             $scheduledAt = ReservationServiceHelper::parseScheduledAt($data['scheduled_date'] ?? null);
 
             if (! $scheduledAt) {
@@ -178,6 +192,23 @@ class ReservationService
                 scheduleStart: $scheduleStart,
                 scheduleEnd: $scheduleEnd,
             );
+
+            // Simpan konfigurasi DP & status pembayaran awal.
+            // payment_status = UNPAID sampai ada callback Midtrans.
+            $updatePaymentFields = [];
+            if (Schema::hasColumn('appointments', 'payment_status')) {
+                $updatePaymentFields['payment_status'] = PaymentStatusEnum::UNPAID;
+            }
+            if (Schema::hasColumn('appointments', 'dp_amount')) {
+                $updatePaymentFields['dp_amount'] = $dpAmount;
+            }
+            if (Schema::hasColumn('appointments', 'dp_percentage')) {
+                $updatePaymentFields['dp_percentage'] = $dpPercentage;
+            }
+            if ($updatePaymentFields !== []) {
+                $booking->update($updatePaymentFields);
+                $booking->refresh();
+            }
 
             $params = ReservationServiceHelper::buildMidtransSnapParams(user: $user, booking: $booking, service: $service);
 
@@ -241,7 +272,15 @@ class ReservationService
         }
 
         if (in_array($transactionStatus, ['capture', 'settlement'], true)) {
-            $booking->update(['status' => AppointmentStatus::CONFIRMED]);
+            $update = ['status' => AppointmentStatus::CONFIRMED];
+
+            if (Schema::hasColumn('appointments', 'payment_status')) {
+                $hasDp = Schema::hasColumn('appointments', 'dp_amount') && (float) ($booking->dp_amount ?? 0) > 0;
+                $hasDp = $hasDp || (Schema::hasColumn('appointments', 'dp_percentage') && (float) ($booking->dp_percentage ?? 0) > 0);
+                $update['payment_status'] = $hasDp ? PaymentStatusEnum::DP : PaymentStatusEnum::PAID;
+            }
+
+            $booking->update($update);
             $this->processReservation($booking);
 
             return [
@@ -253,7 +292,12 @@ class ReservationService
         }
 
         if (in_array($transactionStatus, ['cancel', 'expire', 'deny'], true)) {
-            $booking->update(['status' => AppointmentStatus::CANCELLED]);
+            $update = ['status' => AppointmentStatus::CANCELLED];
+            if (Schema::hasColumn('appointments', 'payment_status')) {
+                $update['payment_status'] = PaymentStatusEnum::FAILED;
+            }
+
+            $booking->update($update);
 
             ReservationServiceHelper::notifyBookingCancelledByPayment($booking);
 

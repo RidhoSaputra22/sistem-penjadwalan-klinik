@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\PaymentStatusEnum;
 use App\Enums\UserRole;
 use App\Helpers\CodeGenerator;
 use Guava\Calendar\Contracts\Eventable;
@@ -32,6 +33,9 @@ class Appointment extends Model implements Eventable, Resourceable
         'original_scheduled_end',
         'status',
         'snap_token',
+        'payment_status',
+        'dp_amount',
+        'dp_percentage',
         'notes',
         'checked_in_at',
         'called_at',
@@ -77,6 +81,9 @@ class Appointment extends Model implements Eventable, Resourceable
     protected $casts = [
         'scheduled_date' => 'date',
         'status' => AppointmentStatus::class,
+        'payment_status' => PaymentStatusEnum::class,
+        'dp_amount' => 'decimal:2',
+        'dp_percentage' => 'decimal:2',
         'original_scheduled_date' => 'date',
         'checked_in_at' => 'datetime',
         'called_at' => 'datetime',

@@ -351,10 +351,31 @@ class ReservationServiceHelper
 
     public static function buildMidtransSnapParams(User $user, Appointment $booking, Service $service): array
     {
+        $grossAmount = (int) ($service->price ?? 0);
+        $itemName = (string) ($service->name ?? 'Layanan');
+
+        if (Schema::hasColumn('appointments', 'dp_amount')) {
+            $dpAmount = (float) ($booking->dp_amount ?? 0);
+            if ($dpAmount > 0) {
+                $grossAmount = (int) round($dpAmount);
+
+                if (Schema::hasColumn('appointments', 'dp_percentage')) {
+                    $dpPercentage = (float) ($booking->dp_percentage ?? 0);
+                    if ($dpPercentage > 0) {
+                        $itemName = 'DP ('.rtrim(rtrim(number_format($dpPercentage, 2, '.', ''), '0'), '.').'%) - '.$itemName;
+                    } else {
+                        $itemName = 'DP - '.$itemName;
+                    }
+                } else {
+                    $itemName = 'DP - '.$itemName;
+                }
+            }
+        }
+
         return [
             'transaction_details' => [
                 'order_id' => $booking->code,
-                'gross_amount' => $service->price,
+                'gross_amount' => $grossAmount,
             ],
             'customer_details' => [
                 'first_name' => $user->name,
@@ -364,9 +385,9 @@ class ReservationServiceHelper
             'item_details' => [
                 [
                     'id' => $service->id,
-                    'price' => $service->price,
+                    'price' => $grossAmount,
                     'quantity' => 1,
-                    'name' => $service->name,
+                    'name' => $itemName,
                 ],
             ],
         ];

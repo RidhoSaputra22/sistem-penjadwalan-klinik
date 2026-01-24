@@ -44,9 +44,12 @@ new class extends Component {
         // dd($payload);
         $snapToken = $payload['snapToken'] ?? null;
 
-        $booking = App\Models\Appointment::where('snap_token', $snapToken)->first();
+        $booking = App\Models\Appointment::where('snap_token', '=', $snapToken, 'and')->first();
         if ($booking) {
             $booking->status = \App\Enums\AppointmentStatus::CANCELLED;
+            if (\Illuminate\Support\Facades\Schema::hasColumn('appointments', 'payment_status')) {
+                $booking->payment_status = \App\Enums\PaymentStatusEnum::FAILED;
+            }
             $booking->save();
         }
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Appointments\Schemas;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\PaymentStatusEnum;
 use App\Enums\UserRole;
 use App\Models\Patient;
 use App\Models\Service;
@@ -79,7 +80,7 @@ class AppointmentForm
                         // Ambil waktu mulai & service terpilih
                         $start = $get('scheduled_start');
                         if ($start && $state) {
-                            $service = Service::find($state);
+                            $service = Service::find($state, ['id', 'duration_minutes']);
                             if ($service && $service->duration_minutes) {
                                 $end = Carbon::parse($start)->addMinutes($service->duration_minutes)->format('H:i:s');
                                 $set('scheduled_end', $end); // update otomatis tanpa reload
@@ -116,7 +117,7 @@ class AppointmentForm
                     ->afterStateUpdated(function ($state, callable $set, callable $get) {
                         $serviceId = $get('service_id');
                         if ($state && $serviceId) {
-                            $service = Service::find($serviceId);
+                            $service = Service::find($serviceId, ['id', 'duration_minutes']);
                             if ($service && $service->duration_minutes) {
                                 $end = Carbon::parse($state)->addMinutes($service->duration_minutes)->format('H:i:s');
                                 $set('scheduled_end', $end);
@@ -136,6 +137,31 @@ class AppointmentForm
                     ->default(AppointmentStatus::PENDING)
                     ->options(AppointmentStatus::class)
                     ->required(),
+
+                Select::make('payment_status')
+                    ->label('Status Pembayaran')
+                    ->native(false)
+                    ->default(PaymentStatusEnum::UNPAID)
+                    ->options(PaymentStatusEnum::class)
+                    ->required()
+                    ->reactive(),
+
+                TextInput::make('dp_amount')
+                    ->label('DP (Nominal)')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->minValue(0)
+                    ->visible(fn (callable $get) => $get('payment_status') === PaymentStatusEnum::DP)
+                    ->helperText('Isi jika DP dihitung nominal.'),
+
+                TextInput::make('dp_percentage')
+                    ->label('DP (%)')
+                    ->numeric()
+                    ->suffix('%')
+                    ->minValue(0)
+                    ->maxValue(100)
+                    ->visible(fn (callable $get) => $get('payment_status') === PaymentStatusEnum::DP)
+                    ->helperText('Isi jika DP dihitung persentase.'),
 
                 // Data antrean (untuk laporan KPI: AWT/TAT/panjang antrean/no-show)
                 DateTimePicker::make('checked_in_at')

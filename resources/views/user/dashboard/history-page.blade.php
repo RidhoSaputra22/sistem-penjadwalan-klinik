@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\AppointmentStatus;
+use App\Enums\PaymentStatusEnum;
 use App\Models\Appointment;
 use App\Services\ReservationService;
 use Carbon\Carbon;
@@ -13,6 +14,8 @@ new class extends Component
     use WithPagination;
 
     public ?string $selectedBookingStatus = null;
+
+    public ?string $selectedPaymentStatus = null;
 
     public ?int $rescheduleBookingId = null;
 
@@ -122,6 +125,16 @@ new class extends Component
         }
     }
 
+    public function updatedSelectedBookingStatus(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedPaymentStatus(): void
+    {
+        $this->resetPage();
+    }
+
     public function with(): array
     {
         $patientId = Auth::user()->patient?->id ?? null;
@@ -132,12 +145,16 @@ new class extends Component
         // }
 
         $availableBookingStatus = AppointmentStatus::asArray();
+        $availablePaymentStatus = PaymentStatusEnum::asArray();
 
         $bookings = Appointment::query()
             ->with(['service', 'doctor', 'room'])
             ->where('patient_id', $patientId)
             ->when($this->selectedBookingStatus && $this->selectedBookingStatus !== 'all', function ($query) {
                 $query->where('status', $this->selectedBookingStatus);
+            })
+            ->when($this->selectedPaymentStatus && $this->selectedPaymentStatus !== 'all', function ($query) {
+                $query->where('payment_status', $this->selectedPaymentStatus);
             })
             ->latest()
             ->paginate(10);
@@ -153,6 +170,7 @@ new class extends Component
         return [
             'bookings' => $bookings,
             'availableBookingStatus' => $availableBookingStatus,
+            'availablePaymentStatus' => $availablePaymentStatus,
             'activeRescheduleBooking' => $activeRescheduleBooking,
         ];
     }
@@ -177,7 +195,16 @@ new class extends Component
             <h2 class="text-xl font-semibold">Riwayat Pesanan</h2>
             <p class="text-sm text-gray-500">Daftar pesanan yang pernah Anda buat.</p>
         </div>
-        <div>
+        <div class="flex items-center gap-3">
+            @component('components.form.select', [
+            'label' => '',
+            'wireModel' => 'selectedPaymentStatus',
+            'options' => $availablePaymentStatus,
+            'default' => ['label' => 'Semua Pembayaran', 'value' => 'all']
+            ])
+
+            @endcomponent
+
             @component('components.form.select', [
             'label' => '',
             'wireModel' => 'selectedBookingStatus',
@@ -201,6 +228,8 @@ new class extends Component
                     <th class="py-3 pr-4">Ruangan</th>
                     <th class="py-3 pr-4">Dokter</th>
                     <th class="py-3 pr-4">Status</th>
+                    <th class="py-3 pr-4">Pembayaran</th>
+                    <th class="py-3 pr-4">DP</th>
                     <th class="py-3">Aksi</th>
                 </tr>
             </thead>
@@ -240,6 +269,46 @@ new class extends Component
                             {{ $label }}
                         </span>
                     </td>
+
+                    <td class="py-3 pr-4">
+                        @php
+                        $payment = $booking->payment_status;
+                        $paymentLabel = $payment?->getLabel() ?? ($payment?->value ?? '-');
+                        $paymentColor = match ($payment?->value) {
+                        'unpaid' => 'bg-gray-100 text-gray-700',
+                        'dp' => 'bg-amber-100 text-amber-700',
+                        'paid' => 'bg-green-100 text-green-700',
+                        'refunded' => 'bg-blue-100 text-blue-700',
+                        'failed' => 'bg-red-100 text-red-700',
+                        default => 'bg-gray-100 text-gray-700',
+                        };
+                        @endphp
+                        <span
+                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium {{ $paymentColor }}">
+                            {{ $paymentLabel }}
+                        </span>
+                    </td>
+
+                    <td class="py-3 pr-4">
+                        @php
+                        $dpAmount = $booking->dp_amount;
+                        $dpPercentage = $booking->dp_percentage;
+
+                        $dpLabel = '-';
+                        if ((float) ($dpAmount ?? 0) > 0 || (float) ($dpPercentage ?? 0) > 0) {
+                        $parts = [];
+                        if ((float) ($dpAmount ?? 0) > 0) {
+                        $parts[] = 'Rp '.number_format((float) $dpAmount, 0, ',', '.');
+                        }
+                        if ((float) ($dpPercentage ?? 0) > 0) {
+                        $parts[] = rtrim(rtrim(number_format((float) $dpPercentage, 2, '.', ''), '0'), '.').'%';
+                        }
+                        $dpLabel = implode(' • ', $parts);
+                        }
+                        @endphp
+                        <span class="text-xs text-gray-700">{{ $dpLabel }}</span>
+                    </td>
+
                     <td class="py-3">
                         <div class="flex items-center gap-2">
                             @if (in_array($booking->status?->value, [AppointmentStatus::CONFIRMED], true))
@@ -267,7 +336,7 @@ new class extends Component
 
                 @empty
                 <tr>
-                    <td colspan="7" class="py-6 text-center text-gray-500">Belum ada riwayat pesanan.</td>
+                    <td colspan="9" class="py-6 text-center text-gray-500">Belum ada riwayat pesanan.</td>
                 </tr>
                 @endforelse
             </tbody>
