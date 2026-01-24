@@ -63,7 +63,7 @@ new class extends Component
             ->all();
 
         $ranked = (new ServiceRecommender)->rank($this->keluhan, $documents, limit: 3, minScore: 0.08);
-        dd($ranked);
+        // dd($ranked);
 
         $recomendtId = collect($ranked)
             ->filter(fn ($r) => isset($r['meta']) && is_array($r['meta']))

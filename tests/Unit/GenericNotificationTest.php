@@ -34,6 +34,7 @@ Klinik Goaria
         $user = User::factory()->create([
             'email' => 'saputra22022@gmail.com',
         ]);
+
         $user->notify(new \App\Notifications\GenericDatabaseNotification(
             message: $message,
             kind: 'test',
