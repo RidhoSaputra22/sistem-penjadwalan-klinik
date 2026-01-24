@@ -21,7 +21,7 @@ new class extends Component
 
     public ?string $booking_time = null;
 
-    public ?string $selected_dp = null;
+    public ?string $selected_dp = 'lunas';
 
     public function mount(): void
     {
@@ -59,13 +59,7 @@ new class extends Component
 
     public function selectDp(string $dp)
     {
-        if (! in_array($dp, ['0.25', '0.5'])) {
-            return;
-        }
-
-        if ($this->selected_dp === $dp) {
-            $this->selected_dp = null;
-
+        if (! in_array($dp, ['lunas', '0.25', '0.5'], true)) {
             return;
         }
 
@@ -85,13 +79,13 @@ new class extends Component
             'phone' => 'required|string|max:20',
             'booking_date' => 'required|date_format:Y-m-d',
             'booking_time' => 'required|date_format:H:i',
-            'selected_dp' => 'required|in:0.25,0.5',
+            'selected_dp' => 'required|in:lunas,0.25,0.5',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'phone.required' => 'Nomor telepon wajib diisi.',
             'booking_date.required' => 'Tanggal reservasi wajib diisi.',
             'booking_time.required' => 'Waktu reservasi wajib diisi.',
-            'selected_dp.required' => 'Silakan pilih DP (25% atau 50%).',
+            'selected_dp.required' => 'Silakan pilih metode pembayaran (lunas / DP 25% / DP 50%).',
         ]);
 
         try {
@@ -201,9 +195,10 @@ new class extends Component
 
         <div x-data="{ selectedDp: @entangle('selected_dp') }">
             <h1 class="font-light pb-2">Uang Muka (DP)</h1>
-            <div class=" grid grid-cols-2 gap-5">
+            <div class=" grid grid-cols-3 gap-5">
                 @php
                 $dpOptions = [
+                'lunas' => 'Bayar Lunas',
                 '0.25' => '25%',
                 '0.5' => '50%',
                 ];

@@ -140,6 +140,12 @@ class ReservationService
 
             $dpRatio = $data['dp_ratio'] ?? null;
             $dpRatio = is_string($dpRatio) ? trim($dpRatio) : $dpRatio;
+
+            // 'lunas' / 1 berarti bayar penuh (tanpa DP)
+            if ($dpRatio === 'lunas' || $dpRatio === '1' || $dpRatio === 1) {
+                $dpRatio = null;
+            }
+
             $dpRatioFloat = is_numeric($dpRatio) ? (float) $dpRatio : null;
             if (! in_array($dpRatioFloat, [0.25, 0.5], true)) {
                 $dpRatioFloat = null;

@@ -39,7 +39,7 @@ Klinik Goaria
             message: $message,
             kind: 'test',
 
-            channel: null,
+            channel: ['database', 'mail'],
             extra: [],
 
         ));
