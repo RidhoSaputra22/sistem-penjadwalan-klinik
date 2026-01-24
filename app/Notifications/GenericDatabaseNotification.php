@@ -14,7 +14,7 @@ class GenericDatabaseNotification extends Notification implements ShouldQueue
     public function __construct(
         protected string $message,
         protected ?string $kind,
-        protected ?string $channel,
+        protected ?string $channel = null,
 
         protected array $extra = []
     ) {}
