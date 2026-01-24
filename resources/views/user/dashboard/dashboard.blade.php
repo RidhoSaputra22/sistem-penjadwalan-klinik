@@ -1,22 +1,24 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Url;
 use Livewire\Volt\Component;
-use Illuminate\Support\Facades\Auth;
 
-new class extends Component {
+new class extends Component
+{
     //
-      #[Url]
+    #[Url]
     public string $tab = 'profile';
 
     public function mount(): void
     {
-        if (!Auth::check()) {
-            $this->redirectRoute('user.login');
+        if (! Auth::check()) {
+            $this->redirect('/');
+
             return;
         }
 
-        if (!in_array($this->tab, ['profile', 'history'], true)) {
+        if (! in_array($this->tab, ['profile', 'history'], true)) {
             $this->tab = 'profile';
         }
     }

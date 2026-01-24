@@ -10,18 +10,20 @@ class DoctorAvailabilityGenerator
     public function generateSchedule(int $doctorId, array $hariRange, array $timeRange): array
     {
         try {
-            $data = DoctorAvailability::where('user_id', $doctorId);
+            $data = DoctorAvailability::query()->where('user_id', $doctorId);
 
             if ($data->count() > 0) {
                 $data->delete();
             }
 
             foreach ($hariRange as $hari) {
-                // dd($hari, WeekdayEnum::from($key)->value);
+                $weekday = $hari instanceof WeekdayEnum
+                    ? $hari
+                    : WeekdayEnum::from(is_numeric($hari) ? (int) $hari : $hari);
 
                 $data = new DoctorAvailability;
                 $data->user_id = $doctorId;
-                $data->weekday = WeekdayEnum::from($hari)->value;
+                $data->weekday = $weekday;
                 $data->start_time = $timeRange[0];
                 $data->end_time = $timeRange[count($timeRange) - 1];
                 $data->is_active = true;

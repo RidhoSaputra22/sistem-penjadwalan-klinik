@@ -2,7 +2,8 @@
 
 use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     public string $tab = 'profile';
 
     public function mount(string $tab = 'profile'): void
@@ -29,8 +30,13 @@ new class extends Component {
             Riwayat
         </a>
 
-        <a href="{{ route('user.logout') }}" class="block px-3 py-2 rounded-sm hover:bg-gray-50 text-red-600">
-            Logout
-        </a>
+        <form method="POST" action="{{ route('user.logout') }}">
+            @csrf
+            <button type="submit" class=" font-medium block w-full text-start px-3 py-2 hover:bg-gray-100 text-red-600">
+                Logout
+            </button>
+        </form>
+
+
     </div>
 </div>

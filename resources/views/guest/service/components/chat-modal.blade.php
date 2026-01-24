@@ -2,6 +2,7 @@
 
 use App\Models\Service;
 use App\Services\Nlp\ServiceRecommender;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Volt\Component;
 
 new class extends Component
@@ -13,13 +14,13 @@ new class extends Component
     /**
      * @var array<int, array{id:int, name:string, slug:string, description:?string, score:float}>
      */
-    public array $recommendations = [];
+    public ?Collection $recommendations = null;
 
     public ?string $recommendationMessage = null;
 
     public function resetRecommendation(): void
     {
-        $this->recommendations = [];
+        $this->recommendations = null;
         $this->recommendationMessage = null;
     }
 
@@ -38,7 +39,7 @@ new class extends Component
             ->get();
 
         if ($services->isEmpty()) {
-            $this->recommendations = [];
+            $this->recommendations = null;
             $this->recommendationMessage = 'Belum ada data layanan untuk direkomendasikan.';
 
             return;
@@ -63,17 +64,18 @@ new class extends Component
 
         $ranked = (new ServiceRecommender)->rank($this->keluhan, $documents, limit: 3, minScore: 0.08);
 
-        $this->recommendations = collect($ranked)
+        $recomendtId = collect($ranked)
             ->filter(fn ($r) => isset($r['meta']) && is_array($r['meta']))
             ->map(fn ($r) => [
                 'id' => (int) $r['id'],
-                'name' => (string) ($r['meta']['name'] ?? ''),
-                'slug' => (string) ($r['meta']['slug'] ?? ''),
-                'description' => $r['meta']['description'] ?? null,
-                'score' => (float) ($r['score'] ?? 0),
             ])
             ->values()
             ->all();
+
+        $this->recommendations = Service::query()
+            ->select(['id', 'name', 'slug', 'description', 'duration_minutes', 'price'])
+            ->whereIn('id', $recomendtId)
+            ->get();
 
         $this->recommendationMessage = empty($this->recommendations)
             ? 'Maaf, kami belum menemukan layanan yang cocok. Coba jelaskan gejala lebih spesifik.'
@@ -83,13 +85,16 @@ new class extends Component
 
 <div x-data="{ isOpen: @entangle('isOpen') }">
     <button type="button" x-cloak x-show="!isOpen" @click="isOpen = true"
-        class="fixed bottom-6 right-6 z-40 bg-blue-600 text-white px-7 py-5 rounded-full shadow-lg hover:opacity-90">
-        Chat Keluhan
+        class="fixed bottom-6 right-6 z-40 bg-blue-700 text-white rounded-bl-xl rounded-tl-xl rounded-tr-xl shadow-lg hover:opacity-90">
+        <div class="flex items-center gap-3 px-5 py-3">
+            @include('components.icons.chat-bubble')
+            Chat Keluhan Kamu disini
+        </div>
     </button>
 
     @component('components.modal', [
     'name' => 'chat-modal',
-    'maxWidth' => 'max-w-3xl',
+    'maxWidth' => 'max-w-5xl',
     ])
 
     <div class="p-6">
@@ -115,26 +120,32 @@ new class extends Component
         @endif
 
         @if(!empty($recommendations))
-        <div class="mt-4 space-y-3">
-            @foreach($recommendations as $rec)
-            <div class="p-4 border border-gray-200 rounded-lg bg-white">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <div class="font-semibold text-gray-900">{{ $rec['name'] }}</div>
-                        @if(!empty($rec['description']))
-                        <div class="mt-1 text-sm font-light text-gray-600">
-                            {{ \Illuminate\Support\Str::limit($rec['description'], 140) }}
-                        </div>
-                        @endif
+        <div class="mt-4 space-y-3 grid grid-cols-3 gap-12">
+            @foreach($recommendations as $service)
+            <a href="{{ route('guest.booking', $service->slug) }}" class="swiper-slide">
+                <div class="relative">
+                    <img src="{{ asset('images/services-placeholder.jpg') }}" alt=""
+                        class="rounded-xl w-full h-60 object-cover">
+                    <div
+                        class="absolute top-2 left-2 bg-primary px-3 py-1 rounded-md text-sm font-medium text-white flex gap-2 items-center ">
+                        @include('components.icons.clock')
+                        {{ $service->duration_minutes }} Menit
                     </div>
-                    @if(!empty($rec['slug']))
-                    <a href="{{ route('guest.booking', ['slug' => $rec['slug']]) }}"
-                        class="shrink-0 text-primary font-medium text-sm">
-                        Booking →
-                    </a>
-                    @endif
                 </div>
-            </div>
+                <div class="mt-4 space-y-2">
+                    <h1 class="text-xl font-light text-overflow-ellipsis truncate uppercase">
+                        {{ $service->name }}
+                    </h1>
+                    <p>
+
+                        {{ Str::limit($service->description ?? 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam, dolorem. ', 50, '...') }}
+                    </p>
+                    <h1 class="text-lg font-semibold mt-2">Rp.
+                        {{ number_format(200000, 0, ',', ',') }}
+                    </h1>
+
+                </div>
+            </a>
             @endforeach
         </div>
         @endif

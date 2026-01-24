@@ -3,7 +3,7 @@
         state: $wire.$entangle(@js($getStatePath())),
 
         check(box) {
-            let options = {{ json_encode(array_values($getOptions())) }};
+            let options = @js(array_map('strval', array_keys($getOptions())));
 
             let lastBoxPressed = this.state.length
                 ? this.state[this.state.length - 1]
@@ -31,13 +31,13 @@
             }
         }
     }" {{ $getExtraAttributeBag() }} class="grid grid-cols-7 justify-between w-full gap-2 select-none">
-        @foreach ($getOptions() as $option)
+        @foreach ($getOptions() as $optionValue => $optionLabel)
 
         <label class="flex gap-2 w-full p-3 border border-gray-300 rounded justify-center cursor-pointer "
-            :class="{ 'bg-primary-500 text-white border-primary-500': state.includes('{{ $option }}') }">
-            <input type="checkbox" value="{{ $option }}" x-model="state" class="sr-only"
-                @click="check('{{ $option }}')" />
-            {{ $option }}
+            :class="{ 'bg-primary-500 text-white border-primary-500': state.includes('{{ $optionValue }}') }">
+            <input type="checkbox" value="{{ $optionValue }}" x-model="state" class="sr-only"
+                @click="check('{{ $optionValue }}')" />
+            {{ $optionLabel }}
         </label>
 
         @endforeach

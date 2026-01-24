@@ -2,16 +2,16 @@
 
 use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     //
 
-    public function with(){
+    public function with()
+    {
         return [
             'services' => \App\Models\Service::all(),
         ];
     }
-
-
 }; ?>
 
 <section class=" bg-primary w-full ">
@@ -20,14 +20,15 @@ new class extends Component {
             <h1 class="text-xl font-light ">Layanan Kami</h1>
             <p class="text-4xl/loose font-semibold">Memastikan kesehatan anda adalah prioritas kami.</p>
             <p class="text-lg/relaxed font-light">
-                Kami menyediakan berbagai layanan medis berkualitas tinggi yang dirancang untuk memenuhi kebutuhan kesehatan
+                Kami menyediakan berbagai layanan medis berkualitas tinggi yang dirancang untuk memenuhi kebutuhan
+                kesehatan
                 Anda dan keluarga.
             </p>
         </div>
         <div class="swiper serviceSwiper h-96 flex-2 " data-aos="fade-up">
             <div class="swiper-wrapper text-white ">
                 @foreach ($services as $service)
-                <a href="#" class="swiper-slide">
+                <a href="{{ route('guest.booking', $service->slug) }}" class="swiper-slide">
                     <div class="relative">
                         <img src="{{ asset('images/services-placeholder.jpg') }}" alt=""
                             class="rounded-xl w-full h-60 object-cover">

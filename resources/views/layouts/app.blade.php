@@ -30,6 +30,8 @@
     @livewire('components.alert')
     @livewire('user.auth.modal.auth-modal')
     @include('components.toolbar', ['isDebug' => 0])
+    @livewire('guest.service.components.chat-modal')
+
 
 
     {{-- Swiper --}}
@@ -42,7 +44,7 @@
 
     @stack('scripts')
     <script>
-        AOS.init();
+    AOS.init();
     </script>
 </body>
 

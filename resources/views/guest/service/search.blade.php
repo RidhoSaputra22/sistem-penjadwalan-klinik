@@ -17,7 +17,6 @@ new class extends Component
 
     {{-- End Content --}}
 
-    @livewire('guest.service.components.chat-modal')
 
 
     @livewire('layouts.footter')

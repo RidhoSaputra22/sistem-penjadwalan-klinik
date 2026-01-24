@@ -2,6 +2,7 @@
 
 namespace App\Filament\Forms\Components;
 
+use BackedEnum;
 use Closure;
 use Filament\Forms\Components\Field;
 use Filament\Support\Contracts\HasLabel as LabelInterface;
@@ -22,6 +23,91 @@ class FieldRangePicker extends Field
         parent::setUp();
 
         $this->default([]);
+
+        $this->formatStateUsing(static function (FieldRangePicker $component, $state) {
+            $options = $component->evaluate($component->options);
+            $enumClass = $component->resolveEnumClass($options);
+
+            if (! $enumClass) {
+                return $state;
+            }
+
+            if (! is_array($state)) {
+                return [];
+            }
+
+            return array_values(array_map(static function ($value) {
+                if ($value instanceof \BackedEnum) {
+                    return (string) $value->value;
+                }
+
+                if ($value instanceof \UnitEnum) {
+                    return $value->name;
+                }
+
+                return (string) $value;
+            }, $state));
+        });
+
+        $this->dehydrateStateUsing(static function (FieldRangePicker $component, $state) {
+            $options = $component->evaluate($component->options);
+            $enumClass = $component->resolveEnumClass($options);
+
+            if (! $enumClass) {
+                return $state;
+            }
+
+            if (! is_array($state)) {
+                return [];
+            }
+
+            $isBackedEnum = is_a($enumClass, BackedEnum::class, allow_string: true);
+            $firstCase = $enumClass::cases()[0] ?? null;
+            $isIntBacked = $isBackedEnum && ($firstCase instanceof BackedEnum) && is_int($firstCase->value);
+
+            return array_values(array_filter(array_map(static function ($value) use ($enumClass, $isBackedEnum, $isIntBacked) {
+                if ($value instanceof \UnitEnum) {
+                    return $value;
+                }
+
+                if ($isBackedEnum) {
+                    $backedValue = $isIntBacked
+                        ? (int) $value
+                        : (string) $value;
+
+                    /** @var class-string<BackedEnum> $backedEnumClass */
+                    $backedEnumClass = $enumClass;
+
+                    /** @var BackedEnum|null $case */
+                    $case = $backedEnumClass::tryFrom($backedValue);
+
+                    return $case;
+                }
+
+                $name = (string) $value;
+                $constantName = $enumClass.'::'.$name;
+
+                return defined($constantName)
+                    ? constant($constantName)
+                    : null;
+            }, $state)));
+        });
+    }
+
+    /**
+     * @return class-string<UnitEnum>|null
+     */
+    protected function resolveEnumClass(mixed $options): ?string
+    {
+        if (
+            is_string($options) &&
+            enum_exists($options)
+        ) {
+            /** @var class-string<UnitEnum> $options */
+            return $options;
+        }
+
+        return null;
     }
 
     /**
@@ -41,11 +127,7 @@ class FieldRangePicker extends Field
     {
         $options = $this->evaluate($this->options);
 
-        if (
-            is_string($options) &&
-            enum_exists($enumClass = $options)
-        ) {
-            /** @var class-string<UnitEnum> $enumClass */
+        if ($enumClass = $this->resolveEnumClass($options)) {
             if (is_a($enumClass, LabelInterface::class, allow_string: true)) {
                 /** @var class-string<UnitEnum&LabelInterface> $enumClass */
 
@@ -69,6 +151,18 @@ class FieldRangePicker extends Field
             $options = $options->toArray();
         }
 
-        return $options ?? [];
+        if (! is_array($options)) {
+            return [];
+        }
+
+        if (array_is_list($options)) {
+            return array_reduce($options, function (array $carry, mixed $option): array {
+                $carry[(string) $option] = $option;
+
+                return $carry;
+            }, []);
+        }
+
+        return $options;
     }
 }

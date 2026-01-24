@@ -33,7 +33,6 @@ new class extends Component
 
     <!-- GoToTop -->
 
-    @livewire('guest.service.components.chat-modal')
 
 
 </div>
