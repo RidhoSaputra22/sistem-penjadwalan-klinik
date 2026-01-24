@@ -21,7 +21,7 @@ new class extends Component
 
     public ?string $booking_time = null;
 
-    public ?string $selected_dp = '0.25';
+    public ?string $selected_dp = null;
 
     public function mount(): void
     {
@@ -59,6 +59,16 @@ new class extends Component
 
     public function selectDp(string $dp)
     {
+        if (! in_array($dp, ['0.25', '0.5'])) {
+            return;
+        }
+
+        if ($this->selected_dp === $dp) {
+            $this->selected_dp = null;
+
+            return;
+        }
+
         $this->selected_dp = $dp;
     }
 
@@ -200,7 +210,7 @@ new class extends Component
                 @endphp
                 @foreach ($dpOptions as $value => $label)
                 <div @click="$wire.selectDp('{{ $value }}')"
-                    class="flex items-center  p-3 cursor-pointer border rounded-md text-center hover:border-primary hover:bg-primary/10"
+                    class="flex items-center  p-3 cursor-pointer border border-gray-300 border-dashed rounded-md text-center hover:border-primary "
                     :class="selectedDp === '{{ $value }}' ? 'border-primary bg-primary/10 font-medium' : ''">
                     {{ $label }}
                 </div>
