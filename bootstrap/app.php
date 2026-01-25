@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Foundation\Application;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('appointments:send-reminders')
             ->everyMinute()
             ->withoutOverlapping();
+
+        $schedule->command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping();
+
     })
     ->withMiddleware(function (Middleware $middleware): void {
         //
