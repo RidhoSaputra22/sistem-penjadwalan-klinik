@@ -19,7 +19,7 @@ class DoctorMiddleware
     {
         $userAuth = Auth::user();
 
-        if ($userAuth->role !== UserRole::DOCTOR
+        if ($userAuth?->role !== UserRole::DOCTOR
         ) {
             abort(403, 'Unauthorized action.');
         }

@@ -20,7 +20,7 @@ class UserMiddleware
         $userAuth = Auth::user();
 
         if (
-            $userAuth->role !== UserRole::PATIENT
+            $userAuth?->role !== UserRole::PATIENT
         ) {
             abort(403, 'Unauthorized action.');
         }
