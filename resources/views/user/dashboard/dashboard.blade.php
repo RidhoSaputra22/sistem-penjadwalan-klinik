@@ -13,7 +13,7 @@ new class extends Component
     public function mount(): void
     {
         if (! Auth::check()) {
-            $this->redirect('/');
+            $this->dispatch('open-auth-modal', 'login');
 
             return;
         }

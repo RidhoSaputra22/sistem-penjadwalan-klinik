@@ -1,6 +1,6 @@
 # WhatsApp Selenium Bot
 
-Bot otomatisasi WhatsApp Web menggunakan **Python + Selenium + ChromeDriver**  
+Bot otomatisasi WhatsApp Web menggunakan **Python + Selenium** (ChromeDriver / GeckoDriver)  
 Mendukung:
 
 - Persistent login (QR hanya sekali)
@@ -17,7 +17,7 @@ Pastikan sistem Anda memenuhi kebutuhan berikut:
 ### Software Wajib
 
 - Python **>= 3.10**
-- Google Chrome (disarankan versi terbaru)
+- Google Chrome (disarankan versi terbaru) atau Mozilla Firefox
 - Git (opsional)
 
 ### Sistem Operasi
@@ -72,6 +72,26 @@ Atau untuk development mode:
 pip install -e .
 ```
 
+Atau dari file requirements:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Dependency Tambahan (Linux) untuk Clipboard Gambar
+
+Fitur copy gambar ke clipboard di Linux membutuhkan **tool sistem**:
+
+- Wayland: `wl-copy` dari paket `wl-clipboard`
+- X11: `xclip`
+
+Contoh (Ubuntu/Debian):
+
+```bash
+sudo apt-get update
+sudo apt-get install -y wl-clipboard xclip
+```
+
 Jika manual:
 
 ```bash
@@ -97,6 +117,8 @@ whatsapp-bot/
 
 - `chrome_profile/`
 - `temp/`
+
+Jika menggunakan Firefox, Anda bisa memakai folder profile terpisah (mis. `firefox_profile/`).
 
 ---
 
@@ -126,6 +148,17 @@ bot = WhatsAppBot(debug=True)
 
 bot.open_chat("628123456789")
 bot.type_message("Halo, ini pesan dari bot")
+bot.send_message()
+```
+
+### Menggunakan Mozilla Firefox (GeckoDriver)
+
+```python
+from whatsapp_bot.bot import WhatsAppBot
+
+bot = WhatsAppBot(browser="firefox", profile_dir="firefox_profile", debug=True)
+bot.open_chat("628123456789")
+bot.paste_message("Halo, ini dari Firefox")
 bot.send_message()
 ```
 

@@ -1,10 +1,9 @@
 <?php
 
+use App\Enums\NotificationType;
 use App\Http\Controllers\GuestController;
-use App\Mail\ConfirmBooking;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -31,16 +30,22 @@ Route::get('/laporan/booking/AWT/pdf', [GuestController::class, 'generateAWTBook
 Route::get('/laporan/booking/TAT/pdf', [GuestController::class, 'generateTATBookingReportPdf'])->name('reports.booking.tat.booking.pdf');
 Route::get('/laporan/booking/ALL/pdf', [GuestController::class, 'generateALLBookingReportPdf'])->name('reports.booking.all.booking.pdf');
 
-Route::get('/test-mail', function () {
+if (config('app.env') === 'local') {
+    Route::get('/test-mail', function () {
 
-    $user = User::firstOrCreate([
-        'email' => 'saputra22022@gmail.com',
-    ], [
-        'name' => 'Test User',
-        'password' => bcrypt('password'),
-    ]);
+        $user = User::firstOrCreate([
+            'email' => 'saputra22022@gmail.com',
+        ], [
+            'name' => 'Test User',
+            'password' => bcrypt('password'),
+        ]);
 
-    Mail::to($user->email)->send(new ConfirmBooking);
+        $user->notify(new \App\Notifications\GenericDatabaseNotification(
+            message: 'This is a test notification message from the system.',
+            kind: NotificationType::BookingCreated->value,
 
-    return 'Sent to saputra22022@gmail.com';
-});
+        ));
+
+        return 'Sent to saputra22022@gmail.com';
+    });
+}

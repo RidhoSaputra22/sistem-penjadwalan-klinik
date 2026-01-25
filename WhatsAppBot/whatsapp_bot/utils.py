@@ -5,6 +5,9 @@ import io
 import qrcode
 from pathlib import Path
 from contextlib import contextmanager
+import os
+import shutil
+import subprocess
 
 import time
 
@@ -33,22 +36,72 @@ def copy_image_to_clipboard(image_path):
     """
     Copy image to clipboard.
 
-    Note: This function is Windows-specific due to win32clipboard usage.
-    On other platforms, this will raise NotImplementedError.
+    Supported platforms:
+    - Windows: uses win32clipboard
+    - Linux:
+        - Wayland: uses wl-copy (wl-clipboard)
+        - X11: uses xclip
+
+    Notes:
+    - This requires a desktop session with clipboard support.
+    - On Linux, install either wl-clipboard (Wayland) or xclip (X11).
     """
-    if sys.platform != 'win32':
-        raise NotImplementedError("copy_image_to_clipboard is only supported on Windows")
 
-    image = Image.open(image_path)
+    image_path = Path(image_path)
+    if not image_path.exists():
+        raise FileNotFoundError(image_path)
 
-    output = io.BytesIO()
-    image.convert("RGB").save(output, "BMP")
-    data = output.getvalue()[14:]  # remove BMP header
-    output.close()
+    if sys.platform == 'win32':
+        with Image.open(image_path) as image:
+            output = io.BytesIO()
+            image.convert("RGB").save(output, "BMP")
+            data = output.getvalue()[14:]  # remove BMP header
 
-    with clipboard_context():
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+        with clipboard_context():
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
+        return
+
+    if sys.platform.startswith('linux'):
+        with Image.open(image_path) as image:
+            output = io.BytesIO()
+            image.save(output, format="PNG")
+            png_bytes = output.getvalue()
+
+        # Prefer Wayland if available
+        if os.environ.get("WAYLAND_DISPLAY") and shutil.which("wl-copy"):
+            subprocess.run(
+                ["wl-copy", "--type", "image/png"],
+                input=png_bytes,
+                check=True,
+            )
+            return
+
+        # X11 fallback
+        if os.environ.get("DISPLAY") and shutil.which("xclip"):
+            subprocess.run(
+                ["xclip", "-selection", "clipboard", "-t", "image/png", "-i"],
+                input=png_bytes,
+                check=True,
+            )
+            return
+
+        missing = []
+        if os.environ.get("WAYLAND_DISPLAY") and not shutil.which("wl-copy"):
+            missing.append("wl-copy (package: wl-clipboard)")
+        if os.environ.get("DISPLAY") and not shutil.which("xclip"):
+            missing.append("xclip")
+
+        hint = ""
+        if missing:
+            hint = " Missing: " + ", ".join(missing) + "."
+
+        raise RuntimeError(
+            "Cannot copy image to clipboard on Linux." + hint +
+            " Install wl-clipboard (Wayland) or xclip (X11), and ensure you have an active desktop session."
+        )
+
+    raise NotImplementedError(f"copy_image_to_clipboard is not supported on platform: {sys.platform}")
 
 def copy_text_to_clipboard(text: str):
     """

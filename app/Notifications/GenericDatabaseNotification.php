@@ -6,6 +6,7 @@ use App\Notifications\Channels\WhatsAppChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
 class GenericDatabaseNotification extends Notification implements ShouldQueue
 {
@@ -21,14 +22,29 @@ class GenericDatabaseNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        $channels = ['database', 'mail'];
+        $channels = ['database'];
+
+        $mailRoute = $notifiable->routeNotificationFor('mail', $this);
+        $hasMailRoute = is_string($mailRoute)
+            ? trim($mailRoute) !== ''
+            : (is_array($mailRoute) ? count(array_filter($mailRoute, fn ($v) => is_string($v) && trim($v) !== '')) > 0 : false);
+
+        if ($hasMailRoute) {
+            $channels[] = 'mail';
+        } else {
+            Log::warning('Skipping mail channel: notifiable has no mail route.', [
+                'notification' => static::class,
+                'notifiable_type' => $notifiable::class,
+                'notifiable_id' => method_exists($notifiable, 'getKey') ? $notifiable->getKey() : null,
+            ]);
+        }
 
         if ((bool) config('services.whatsapp.enabled', false)) {
             $channels[] = WhatsAppChannel::class;
         }
 
         if ($this->channel !== null) {
-            $channels[] = $this->channel;
+            $channels = $this->channel;
         }
 
         return $channels;
@@ -36,13 +52,18 @@ class GenericDatabaseNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): \Illuminate\Notifications\Messages\MailMessage
     {
+        Log::info('invoke toMail');
+
         $mailMessage = (new \Illuminate\Notifications\Messages\MailMessage)
             ->subject('Notification')
-            ->line($this->message);
+            ->greeting('Hallo '.($notifiable->name ?? ''))
 
-        if (isset($this->extra['action_url']) && isset($this->extra['action_text'])) {
-            $mailMessage->action($this->extra['action_text'], $this->extra['action_url']);
-        }
+            ->line($this->message)
+
+            ->line('Silakan cek detail booking Anda di sini')
+            ->line(route('user.dashboard', ['tab' => 'history']))
+            ->line('Terima kasih telah menggunakan aplikasi kami.')
+            ->salutation('Salam Hormat, '.(config('app.name', 'Our Application')));
 
         return $mailMessage;
     }
@@ -53,10 +74,26 @@ class GenericDatabaseNotification extends Notification implements ShouldQueue
     public function toWhatsApp(object $notifiable): array|string|null
     {
         // Flexible payload: WhatsApp API may accept extra fields (message, action_url, etc.)
-        return array_merge([
-            'message' => $this->message,
-            'phone' => $notifiable->phone,
-        ], $this->extra);
+
+        $phone = isset($notifiable->phone) && is_string($notifiable->phone) && trim($notifiable->phone) !== ''
+            ? trim($notifiable->phone)
+            : null;
+
+        $message = 'Hallo '.($notifiable->name ?? '').",\n\n";
+        $message .= $this->message."\n\n";
+        $message .= "Silakan cek detail booking Anda di sini:\n";
+        $message .= route('user.dashboard', ['tab' => 'history'])."\n\n";
+        $message .= "Terima kasih telah menggunakan aplikasi kami.\n";
+
+        $payload = [
+            'message' => $message,
+        ];
+
+        if ($phone !== null) {
+            $payload['phone'] = $phone;
+        }
+
+        return array_merge($payload, $this->extra);
     }
 
     public function toArray(object $notifiable): array

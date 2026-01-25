@@ -1,15 +1,18 @@
-from flask import Flask, request, jsonify, g
-from whatsapp_bot.bot import WhatsAppBot
-from pathlib import Path
 import traceback
 import os
 import sys
+from pathlib import Path
 from datetime import datetime
 import time
 import uuid
 
 # Ensure project root (WhatsAppBot/) is on sys.path when running as a script.
+# This must happen BEFORE importing whatsapp_bot, otherwise Python may import
+# a stale installed version from site-packages.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from flask import Flask, request, jsonify, g
+from whatsapp_bot.bot import WhatsAppBot
 
 from Database.conn import Database
 
@@ -33,7 +36,7 @@ def get_bot() -> WhatsAppBot:
         _bot = WhatsAppBot(
             debug=True,
             timeout=30,
-        )
+            browser= "chrome")
     return _bot
 
 

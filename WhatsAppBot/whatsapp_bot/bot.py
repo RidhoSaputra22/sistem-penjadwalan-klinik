@@ -7,12 +7,15 @@ from functools import lru_cache
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 import whatsapp_bot.utils as utils
 
@@ -22,6 +25,12 @@ import whatsapp_bot.utils as utils
 def _get_chromedriver_path():
     """Get cached ChromeDriver path."""
     return ChromeDriverManager().install()
+
+
+@lru_cache(maxsize=1)
+def _get_geckodriver_path():
+    """Get cached GeckoDriver path."""
+    return GeckoDriverManager().install()
 
 
 class WhatsAppBot:
@@ -37,14 +46,21 @@ class WhatsAppBot:
 
     def __init__(
         self,
-        profile_dir: str = "chrome_profile",
+        profile_dir: str | None = None,
         timeout: int = 15,
         debug: bool = True,
         chrome_binary: str = None,
+        firefox_binary: str = None,
+        browser: str = "chrome",
     ):
         self.timeout = timeout
         self.debug = debug
+        self.browser = (browser or "chrome").lower().strip()
         self.chrome_binary = chrome_binary
+        self.firefox_binary = firefox_binary
+
+        if not profile_dir:
+            profile_dir = "firefox_profile" if self.browser in {"firefox", "mozilla"} else "chrome_profile"
 
         self._setup_logger()
         self._wait_cache = None  # Cache for WebDriverWait
@@ -78,16 +94,22 @@ class WhatsAppBot:
             self._wait_cache = WebDriverWait(self.driver, self.timeout)
         return self._wait_cache
 
-    def _init_driver(self, profile_dir: str) -> webdriver.Chrome:
+    def _init_driver(self, profile_dir: str):
+        if self.browser in {"firefox", "mozilla"}:
+            return self._init_firefox_driver(profile_dir)
+
+        # Default: Chrome
+        return self._init_chrome_driver(profile_dir)
+
+    def _init_chrome_driver(self, profile_dir: str) -> webdriver.Chrome:
         self.logger.debug("Initializing Chrome driver")
 
-        options = Options()
+        options = ChromeOptions()
 
         # Use provided binary path or try OS-specific default locations
         if self.chrome_binary:
             options.binary_location = self.chrome_binary
         elif os.name == 'nt':  # Windows
-            # Try common Chrome installation paths on Windows
             possible_paths = [
                 r"C:\Program Files\Google\Chrome\Application\chrome.exe",
                 r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -98,12 +120,11 @@ class WhatsAppBot:
                     options.binary_location = path
                     break
         elif os.name == 'posix':  # Linux/Mac
-            # Try common Chrome/Chromium locations
             possible_paths = [
-                '/usr/bin/google-chrome',  # Linux
-                '/usr/bin/chromium-browser',  # Linux
-                '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',  # macOS
-
+                '/usr/bin/google-chrome',
+                '/usr/bin/chromium-browser',
+                '/usr/bin/chromium',
+                '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
             ]
             for path in possible_paths:
                 if os.path.exists(path):
@@ -111,15 +132,63 @@ class WhatsAppBot:
                     break
 
         profile_path = os.path.abspath(profile_dir)
+        os.makedirs(profile_path, exist_ok=True)
         options.add_argument(f"--user-data-dir={profile_path}")
         options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
         options.add_argument("--start-maximized")
 
         driver = webdriver.Chrome(
-            service=Service(_get_chromedriver_path()),
+            service=ChromeService(_get_chromedriver_path()),
             options=options,
         )
+
+        return driver
+
+    def _init_firefox_driver(self, profile_dir: str) -> webdriver.Firefox:
+        self.logger.debug("Initializing Firefox (GeckoDriver) driver")
+
+        options = FirefoxOptions()
+
+        if self.firefox_binary:
+            options.binary_location = self.firefox_binary
+        elif os.name == 'nt':
+            possible_paths = [
+                r"C:\Program Files\Mozilla Firefox\firefox.exe",
+                r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
+            ]
+            for path in possible_paths:
+                if os.path.exists(path):
+                    options.binary_location = path
+                    break
+        elif os.name == 'posix':
+            possible_paths = [
+                '/usr/bin/firefox',
+                '/snap/bin/firefox',
+                '/Applications/Firefox.app/Contents/MacOS/firefox',
+            ]
+            for path in possible_paths:
+                if os.path.exists(path):
+                    options.binary_location = path
+                    break
+
+        profile_path = os.path.abspath(profile_dir)
+        os.makedirs(profile_path, exist_ok=True)
+
+        # Important: Using FirefoxProfile() often results in a temporary profile copy.
+        # To persist cookies/session across runs, launch Firefox with -profile <dir>.
+        options.add_argument("-profile")
+        options.add_argument(profile_path)
+
+        driver = webdriver.Firefox(
+            service=FirefoxService(_get_geckodriver_path()),
+            options=options,
+        )
+
+        try:
+            driver.maximize_window()
+        except Exception:
+            pass
 
         return driver
 

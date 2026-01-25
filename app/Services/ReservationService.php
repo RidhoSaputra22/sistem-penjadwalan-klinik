@@ -225,8 +225,6 @@ class ReservationService
             $booking->update(['snap_token' => $snapToken]);
             $booking->refresh();
 
-            ReservationServiceHelper::notifyBookingCreated($user, $booking);
-
             return [
                 'booking' => $booking,
                 'snap_token' => $snapToken,

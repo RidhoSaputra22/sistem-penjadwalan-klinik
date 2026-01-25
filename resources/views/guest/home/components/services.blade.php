@@ -59,7 +59,7 @@ new class extends Component
             <div class="swiper-pagination"></div>
         </div>
         <div class="flex justify-end" data-aos="fade-up">
-            <a href=""
+            <a href="{{ route('guest.service.search') }}"
                 class=" mt-5 inline-block bg-white text-primary px-6 py-2 rounded-md font-medium hover:bg-gray-100 hover:-translate-y-1 transition">
                 Lihat Semua Layanan
             </a>

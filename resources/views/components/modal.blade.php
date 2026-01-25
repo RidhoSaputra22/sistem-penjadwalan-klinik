@@ -2,6 +2,7 @@
     'maxWidth' => 'max-w-lg',
     // Optional identifier to target this modal when closing from outside
     'name' => null,
+
 ])
 
 

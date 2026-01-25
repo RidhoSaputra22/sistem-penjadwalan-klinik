@@ -1,30 +1,33 @@
 <?php
 
-use App\Models\Package;
 use App\Models\Category;
 use App\Models\Service;
 use Livewire\Volt\Component;
-use Livewire\WithPagination;
 use Livewire\WithoutUrlPagination;
+use Livewire\WithPagination;
 
-new class extends Component {
+new class extends Component
+{
     //
 
-    use WithPagination, WithoutUrlPagination;
+    use WithoutUrlPagination, WithPagination;
 
     public string $search = '';
+
     public ?string $selectedCategorySlug = null;
+
     public ?string $selectedDuration = null;
+
     public ?string $selectedHarga = null;
+
     public ?string $selectedSortBy = null;
 
-
     public function mount()
-{
-    if (request()->has('category')) {
-        $this->selectedCategorySlug = request('category');
+    {
+        if (request()->has('category')) {
+            $this->selectedCategorySlug = request('category');
+        }
     }
-}
 
     /**
      * Auto reset pagination ketika filter berubah
@@ -48,7 +51,6 @@ new class extends Component {
     {
         $query = Service::query()
             ->with('category');
-
 
         // Filter Kategori
         if ($this->selectedCategorySlug) {
@@ -79,8 +81,8 @@ new class extends Component {
         // Search (GROUPED)
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('description', 'like', '%' . $this->search . '%');
+                $q->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('description', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -99,12 +101,11 @@ new class extends Component {
         $availableCategory = Category::all();
 
         return [
-            'services'   => $this->getPackage(),
+            'services' => $this->getPackage(),
             'durations' => $availableDurations,
             'categories' => $availableCategory,
         ];
     }
-
 }; ?>
 
 
@@ -112,58 +113,60 @@ new class extends Component {
     <div class="flex gap-24">
         {{-- FILTER --}}
         <div class="flex-1 bg-white rounded-2xl">
-            <h1 class="text-xl font-semibold mb-6">Filter Produk</h1>
+            <div class="fixed">
+                <h1 class="text-xl font-semibold mb-6">Filter Produk</h1>
 
-            <div class="space-y-6">
-                @component('components.form.select', [
-                'label' => 'Kategori',
-                'wireModel' => 'selectedCategorySlug',
-                'default' => [
-                'label' => 'Semua Kategori',
-                'value' => '',
-                ],
-                'options' => $categories->map(fn ($c) => [
-                'label' => $c->name,
-                'value' => $c->slug,
-                ]),
-                ]) @endcomponent
-                @component('components.form.select', [
-                'label' => 'Durasi',
-                'wireModel' => 'selectedDuration',
-                'default' => [
-                'label' => 'Semua Durasi',
-                'value' => '',
-                ],
-                'options' => $durations->map(fn ($d) => [
-                'label' => $d . ' menit',
-                'value' => $d,
-                ]),
-                ]) @endcomponent
+                <div class="space-y-6">
+                    @component('components.form.select', [
+                    'label' => 'Kategori',
+                    'wireModel' => 'selectedCategorySlug',
+                    'default' => [
+                    'label' => 'Semua Kategori',
+                    'value' => '',
+                    ],
+                    'options' => $categories->map(fn ($c) => [
+                    'label' => $c->name,
+                    'value' => $c->slug,
+                    ]),
+                    ]) @endcomponent
+                    @component('components.form.select', [
+                    'label' => 'Durasi',
+                    'wireModel' => 'selectedDuration',
+                    'default' => [
+                    'label' => 'Semua Durasi',
+                    'value' => '',
+                    ],
+                    'options' => $durations->map(fn ($d) => [
+                    'label' => $d . ' menit',
+                    'value' => $d,
+                    ]),
+                    ]) @endcomponent
 
-                @component('components.form.select', [
-                'label' => 'Harga',
-                'wireModel' => 'selectedHarga',
-                'options' => [
-                ['label' => 'Semua Harga', 'value' => ''],
-                ['label' => 'Rendah ke Tinggi', 'value' => 'low_to_high'],
-                ['label' => 'Tinggi ke Rendah', 'value' => 'high_to_low'],
-                ],
-                ]) @endcomponent
+                    @component('components.form.select', [
+                    'label' => 'Harga',
+                    'wireModel' => 'selectedHarga',
+                    'options' => [
+                    ['label' => 'Semua Harga', 'value' => ''],
+                    ['label' => 'Rendah ke Tinggi', 'value' => 'low_to_high'],
+                    ['label' => 'Tinggi ke Rendah', 'value' => 'high_to_low'],
+                    ],
+                    ]) @endcomponent
 
-                @component('components.form.select', [
-                'label' => 'Urutkan',
-                'wireModel' => 'selectedSortBy',
-                'options' => [
-                ['label' => 'Terbaru', 'value' => 'newest'],
-                ['label' => 'Terlama', 'value' => 'oldest'],
-                ],
-                ]) @endcomponent
+                    @component('components.form.select', [
+                    'label' => 'Urutkan',
+                    'wireModel' => 'selectedSortBy',
+                    'options' => [
+                    ['label' => 'Terbaru', 'value' => 'newest'],
+                    ['label' => 'Terlama', 'value' => 'oldest'],
+                    ],
+                    ]) @endcomponent
+                </div>
             </div>
         </div>
         <div class="flex-5 space-y-14 ">
             <div>
-                <input type="text" wire:model.live.debounce.500ms="search" class="border rounded px-4 py-2 w-full"
-                    placeholder="Masukkan nama produk...">
+                <input type="text" wire:model.live.debounce.500ms="search"
+                    class="border border-gray-300 rounded px-4 py-2 w-full" placeholder="Masukkan nama produk...">
             </div>
             {{ $services->links(data: ['scrollTo' => '#paginated-posts']) }}
 

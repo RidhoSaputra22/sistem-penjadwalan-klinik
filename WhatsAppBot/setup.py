@@ -45,11 +45,9 @@ setup(
             "flake8",
             "mypy",
         ],
-        "linux": [
-            # optional helpers for clipboard on Linux
-            "xclip; platform_system=='Linux'",
-            "xsel; platform_system=='Linux'",
-        ],
+        # Note: Image clipboard support on Linux uses system tools (wl-copy or xclip),
+        # not Python packages. See README for installation commands.
+        "linux": [],
     },
 
     classifiers=[

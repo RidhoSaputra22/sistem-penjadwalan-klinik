@@ -1,9 +1,10 @@
 <?php
 
-use Livewire\Volt\Component;
 use Livewire\Attributes\On;
+use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     #[On('booking-updated-nav')]
     public function refreshBookingHint(): void
     {
@@ -25,13 +26,13 @@ new class extends Component {
         :class="isScroll ? 'shadow-md bg-white transition-all translate-y-1 duration-300 ease-in-out' : 'transition-all  duration-300 ease-in-out'">
         <div class="  h-20 flex justify-between p-5 items-center  ">
             <div class="flex gap-15">
-                <div class="flex items-center gap-2">
+                <a href="{{ route('guest.home.welcome') }}" class="flex items-center gap-2">
                     <img src="{{ asset('images/logo.jpg') }}" alt="" class="w-14 aspect-square">
                     <div class="">
                         <h1 class="text-xl font-semibold">Klinik Goaria</h1>
                         <h1 class="text-sm/tight font-light">Melayani sejak 2010</h1>
                     </div>
-                </div>
+                </a>
                 <ul class=" flex gap-5 items-center">
                     <li>
                         <a href="{{ route('guest.home.welcome') }}"
@@ -51,12 +52,7 @@ new class extends Component {
                             Layanan Kami
                         </a>
                     </li>
-                    <li>
-                        <a href="#"
-                            class="hover:text-primary transition-all duration-300 ease-in-out {{ request()->routeIs('guest.about.index') ? 'text-primary font-semibold' : '' }}">
-                            Tentang Kami
-                        </a>
-                    </li>
+
                 </ul>
             </div>
             <div>

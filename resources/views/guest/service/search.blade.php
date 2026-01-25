@@ -12,8 +12,9 @@ new class extends Component
 
 
     {{-- Content --}}
-    @livewire('guest.service.banner')
+
     @livewire('guest.service.content')
+
 
     {{-- End Content --}}
 
