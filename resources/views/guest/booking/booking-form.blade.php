@@ -34,7 +34,7 @@ new class extends Component
             $this->phone = $this->phone ?: ($user->phone ?? '');
         }
 
-        if (Auth::user()->role === App\Enums\UserRole::DOCTOR) {
+        if (Auth::user()?->role === App\Enums\UserRole::DOCTOR) {
             $this->addError('form', 'Dokter tidak dapat melakukan reservasi.');
         }
     }
@@ -142,7 +142,7 @@ new class extends Component
         @endif
 
         <div
-            class="space-y-5 {{ auth()->user()->role === App\Enums\UserRole::DOCTOR ? 'opacity-50  pointer-events-none cursor-not-allowed' : '' }}">
+            class="space-y-5 {{ auth()->user()?->role === App\Enums\UserRole::DOCTOR ? 'opacity-50  pointer-events-none cursor-not-allowed' : '' }}">
             <div class="space-y-2">
                 <h1 class="text-4xl font-bold">Booking Sekarang</h1>
                 <p class="text-sm font-light">Silakan isi formulir di bawah untuk melakukan pemesanan.</p>
