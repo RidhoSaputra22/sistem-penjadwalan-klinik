@@ -25,12 +25,17 @@ new class extends Component
 
     public function mount(): void
     {
+
         if (Auth::check()) {
             $user = Auth::user();
             $this->name = $this->name ?: ($user->name ?? '');
             $this->email = $this->email ?: ($user->email ?? '');
 
             $this->phone = $this->phone ?: ($user->phone ?? '');
+        }
+
+        if (Auth::user()->role === App\Enums\UserRole::DOCTOR) {
+            $this->addError('form', 'Dokter tidak dapat melakukan reservasi.');
         }
     }
 
@@ -117,7 +122,7 @@ new class extends Component
 }; ?>
 
 <div>
-    <div wire:loading.class="opacity-50 cursor-not-allowed" class="space-y-5">
+    <div wire:loading.class="opacity-50 cursor-not-allowed" class="space-y-5  ">
         @if (session()->has('success'))
         <div class="p-3 border border-gray-200 bg-gray-50 rounded-md text-sm font-light">
             {{ session('success') }}
@@ -136,96 +141,105 @@ new class extends Component
         </div>
         @endif
 
-        <div class="space-y-2">
-            <h1 class="text-4xl font-bold">Booking Sekarang</h1>
-            <p class="text-sm font-light">Silakan isi formulir di bawah untuk melakukan pemesanan.</p>
-        </div>
-
-        @guest
-        <div class="p-3 border border-gray-200 bg-gray-50 rounded-md text-sm font-light">
-            Silakan login terlebih dahulu untuk mengisi formulir reservasi.
-            <button wire:click="$dispatch('open-auth-modal', { tab: 'login' })" class="text-primary font-medium ml-1">
-                Login
-            </button>
-        </div>
-        @endguest
-
-        @auth
-        <div class="space-y-4">
-            @component('components.form.input', [
-            'wireModel' => 'name',
-            'label' => 'Nama Lengkap',
-            'type' => 'text',
-            'required' => true,
-            'disabled' => true,
-
-            ])
-
-            @endcomponent
-            @component('components.form.input', [
-            'wireModel' => 'email',
-            'label' => 'Email',
-            'type' => 'email',
-            'required' => true,
-            'disabled' => true,
-
-            ])
-
-            @endcomponent
-            @component('components.form.input', [
-            'wireModel' => 'phone',
-            'label' => 'Nomor Telepon',
-            'type' => 'text',
-            'required' => true,
-            'disabled' => true,
-
-            ])
-
-            @endcomponent
-        </div>
-        <div>
-            <h1 class="font-light pb-2">Pilih Tanggal & Waktu Reservasi</h1>
-            @livewire('guest.booking.components.booking-callendar', ['service' => $service])
-            @if ($errors->has('booking_date') || $errors->has('booking_time'))
-            <p class="text-sm font-light text-red-500">
-                Silakan pilih tanggal dan waktu reservasi.
-            </p>
-            @endif
-        </div>
-
-        <div x-data="{ selectedDp: @entangle('selected_dp') }">
-            <h1 class="font-light pb-2">Uang Muka (DP)</h1>
-            <div class=" grid grid-cols-3 gap-5">
-                @php
-                $dpOptions = [
-                'lunas' => 'Bayar Lunas',
-                '0.25' => '25%',
-                '0.5' => '50%',
-                ];
-                @endphp
-                @foreach ($dpOptions as $value => $label)
-                <div @click="$wire.selectDp('{{ $value }}')"
-                    class="flex items-center  p-3 cursor-pointer border border-gray-300 border-dashed rounded-md text-center hover:border-primary "
-                    :class="selectedDp === '{{ $value }}' ? 'border-primary bg-primary/10 font-medium' : ''">
-                    {{ $label }}
-                </div>
-                @endforeach
+        <div
+            class="space-y-5 {{ auth()->user()->role === App\Enums\UserRole::DOCTOR ? 'opacity-50  pointer-events-none cursor-not-allowed' : '' }}">
+            <div class="space-y-2">
+                <h1 class="text-4xl font-bold">Booking Sekarang</h1>
+                <p class="text-sm font-light">Silakan isi formulir di bawah untuk melakukan pemesanan.</p>
             </div>
+
+            @guest
+            <div class="p-3 border border-gray-200 bg-gray-50 rounded-md text-sm font-light">
+                Silakan login terlebih dahulu untuk mengisi formulir reservasi.
+                <button wire:click="$dispatch('open-auth-modal', { tab: 'login' })"
+                    class="text-primary font-medium ml-1">
+                    Login
+                </button>
+            </div>
+            @endguest
+
+            @auth
+            <div class="space-y-4">
+                @component('components.form.input', [
+                'wireModel' => 'name',
+                'label' => 'Nama Lengkap',
+                'type' => 'text',
+                'required' => true,
+                'disabled' => true,
+
+                ])
+
+                @endcomponent
+                @component('components.form.input', [
+                'wireModel' => 'email',
+                'label' => 'Email',
+                'type' => 'email',
+                'required' => true,
+                'disabled' => true,
+
+                ])
+
+                @endcomponent
+                @component('components.form.input', [
+                'wireModel' => 'phone',
+                'label' => 'Nomor Telepon',
+                'type' => 'text',
+                'required' => true,
+                'disabled' => true,
+
+                ])
+
+                @endcomponent
+            </div>
+            <div>
+                <h1 class="font-light pb-2">Pilih Tanggal & Waktu Reservasi</h1>
+                @livewire('guest.booking.components.booking-callendar', ['service' => $service])
+                @if ($errors->has('booking_date') || $errors->has('booking_time'))
+                <p class="text-sm font-light text-red-500">
+                    Silakan pilih tanggal dan waktu reservasi.
+                </p>
+                @endif
+            </div>
+
+            <div x-data="{ selectedDp: @entangle('selected_dp') }">
+                <h1 class="font-light pb-2">Uang Muka (DP)</h1>
+                <div class=" grid grid-cols-3 gap-5">
+                    @php
+                    $dpOptions = [
+                    'lunas' => 'Bayar Lunas',
+                    '0.25' => '25%',
+                    '0.5' => '50%',
+                    ];
+                    @endphp
+                    @foreach ($dpOptions as $value => $label)
+                    <div @click="$wire.selectDp('{{ $value }}')"
+                        class="flex items-center  p-3 cursor-pointer border border-gray-300 border-dashed rounded-md text-center hover:border-primary "
+                        :class="selectedDp === '{{ $value }}' ? 'border-primary bg-primary/10 font-medium' : ''">
+                        {{ $label }}
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+
+            <div>
+                @component('components.form.button', [
+                'label' => 'Submit',
+                'wireClick' => 'submitForm',
+                'wireLoadingClass' => 'opacity-50',
+                'class' => 'w-full py-3 bg-primary text-white rounded-md hover:bg-primary-dark',
+                ])
+
+                @endcomponent
+            </div>
+            @endauth
         </div>
 
 
-        <div>
-            @component('components.form.button', [
-            'label' => 'Submit',
-            'wireClick' => 'submitForm',
-            'wireLoadingClass' => 'opacity-50',
-            'class' => 'w-full py-3 bg-primary text-white rounded-md hover:bg-primary-dark',
-            ])
 
-            @endcomponent
-        </div>
-        @endauth
     </div>
+
+
 
 </div>
 

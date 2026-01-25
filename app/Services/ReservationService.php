@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\AppointmentStatus;
 use App\Enums\NotificationType;
 use App\Enums\PaymentStatusEnum;
+use App\Enums\UserRole;
 use App\Models\Appointment;
 use App\Models\Holiday;
 use App\Models\Service;
@@ -12,6 +13,7 @@ use App\Models\User;
 use App\Notifications\GenericDatabaseNotification;
 use App\Services\Helper\ReservationServiceHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
@@ -121,6 +123,14 @@ class ReservationService
      */
     public function createReservation(array $data)
     {
+
+        // Dokter tak dapat membuat reservasi
+        if (Auth::user()->role === UserRole::DOCTOR) {
+            throw ValidationException::withMessages([
+                'unauthorized' => 'Dokter tidak diizinkan membuat reservasi.',
+            ]);
+        }
+
         $this->ensureMidtransConfigured();
 
         return DB::transaction(function () use ($data) {

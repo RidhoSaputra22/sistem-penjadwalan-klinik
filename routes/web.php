@@ -2,6 +2,8 @@
 
 use App\Enums\NotificationType;
 use App\Http\Controllers\GuestController;
+use App\Http\Middleware\DoctorMiddleware;
+use App\Http\Middleware\UserMiddleware;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -15,7 +17,13 @@ Volt::route('/detail-dokter/{slug}', 'guest.doctor.detail')->name('guest.doctor.
 Volt::route('/cari-layanan', 'guest.service.search')->name('guest.service.search');
 Volt::route('/booking/{slug}', 'guest.booking.booking')->name('guest.booking');
 
-Volt::route('/user/dashboard', 'user.dashboard.dashboard')->name('user.dashboard');
+Volt::route('/user/dashboard', 'user.dashboard.dashboard')
+    ->middleware(UserMiddleware::class)
+    ->name('user.dashboard');
+
+Volt::route('/doctor/dashboard', 'doctor.dashboard.dashboard')
+    ->middleware(DoctorMiddleware::class)
+    ->name('doctor.dashboard');
 
 Volt::route('/services', 'guest.services.index')->name('guest.services.index');
 Volt::route('/about', 'guest.about.index')->name('guest.about.index');

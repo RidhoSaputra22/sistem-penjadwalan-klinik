@@ -93,6 +93,12 @@ new class extends Component
                                 </div>
                             </div>
                             <div class=" ">
+                                @if (auth()->user()?->role === App\Enums\UserRole::DOCTOR)
+                                <a href="{{ route('doctor.dashboard') }}"
+                                    class="text-sm font-medium block px-4 py-4 hover:bg-gray-100">
+                                    Dashboard Dokter
+                                </a>
+                                @else
                                 <a href="{{ route('user.dashboard') }}"
                                     class="text-sm font-medium block px-4 py-4 hover:bg-gray-100">
                                     Lihat Profil
@@ -101,6 +107,7 @@ new class extends Component
                                     class="text-sm font-medium block px-4 py-4 hover:bg-gray-100">
                                     Lihat History Booking
                                 </a>
+                                @endif
                                 <form method="POST" action="{{ route('user.logout') }}">
                                     @csrf
                                     <button type="submit"

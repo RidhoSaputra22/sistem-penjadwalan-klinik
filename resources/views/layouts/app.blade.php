@@ -30,7 +30,13 @@
     @livewire('components.alert')
     @livewire('user.auth.modal.auth-modal')
     @include('components.toolbar', ['isDebug' => 0])
+
+
+    @if(auth()->user()?->role !== App\Enums\UserRole::DOCTOR)
+
     @livewire('components.chat-modal')
+
+    @endif
 
 
 
