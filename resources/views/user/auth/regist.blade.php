@@ -1,26 +1,31 @@
 <?php
 
-use App\Models\User;
-
 use App\Enums\UserRole;
-use Illuminate\Support\Str;
-use Livewire\Volt\Component;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
+use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     //
     public string $name = '';
+
     public string $email = '';
+
     public string $phone = '';
+
     public string $password = '';
+
     public string $confirmPassword = '';
 
-    public function goToLogin(){
+    public function goToLogin()
+    {
         $this->dispatch('changeAuthModalTab', tab: 'login');
     }
 
@@ -28,7 +33,7 @@ new class extends Component {
     {
         $this->name = 'Test User';
         $this->email = 'testuser@gmail.com';
-        $this->phone = '+6281234567890';
+        $this->phone = '081234567890';
         $this->password = 'password123';
         $this->confirmPassword = 'password123';
     }
@@ -36,16 +41,17 @@ new class extends Component {
     public function regist(): void
     {
         // Rate limit (anti spam/bruteforce sederhana)
-        $key = 'regist:' . request()->ip();
+        $key = 'regist:'.request()->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
             $this->addError('email', "Terlalu banyak percobaan. Coba lagi dalam {$seconds} detik.");
+
             return;
         }
         RateLimiter::hit($key, 60);
 
         // Normalisasi input
-        $this->name  = trim($this->name);
+        $this->name = trim($this->name);
         $this->email = Str::lower(trim($this->email));
 
         // Simpan format phone "bersih" (angka + optional leading +)
@@ -86,8 +92,6 @@ new class extends Component {
             event(new Registered($user));
         });
 
-
-
         session()->flash('alert', [
             'type' => 'success',
             'message' => 'Login berhasil!',
@@ -107,17 +111,8 @@ new class extends Component {
         // IMPORTANT: session() was regenerated; refresh/redirect to avoid Livewire 419 ("page expired")
         $redirectTo = request()->header('referer') ?: route('guest.home.welcome');
         $this->redirect($redirectTo);
-        return;
-
-
 
     }
-
-
-
-
-
-
 }; ?>
 
 

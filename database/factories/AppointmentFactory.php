@@ -69,6 +69,7 @@ class AppointmentFactory extends Factory
             'dp_amount' => $dpAmount,
             'dp_percentage' => $dpPercentage,
             'notes' => fake()->optional()->sentence(),
+            'reminder_sent_at' => null,
         ];
     }
 }

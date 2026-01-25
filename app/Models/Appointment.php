@@ -44,6 +44,7 @@ class Appointment extends Model implements Eventable, Resourceable
         'no_show_at',
         'rescheduled_count',
         'last_rescheduled_at',
+        'reminder_sent_at',
     ];
 
     protected static function booted()
@@ -91,6 +92,7 @@ class Appointment extends Model implements Eventable, Resourceable
         'service_ended_at' => 'datetime',
         'no_show_at' => 'datetime',
         'last_rescheduled_at' => 'datetime',
+        'reminder_sent_at' => 'datetime',
     ];
 
     public function patient()

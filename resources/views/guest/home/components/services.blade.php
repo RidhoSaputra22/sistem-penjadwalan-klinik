@@ -30,7 +30,7 @@ new class extends Component
                 @foreach ($services as $service)
                 <a href="{{ route('guest.booking', $service->slug) }}" class="swiper-slide">
                     <div class="relative">
-                        <img src="{{ asset('images/services-placeholder.jpg') }}" alt=""
+                        <img src="{{ Storage::url($service->photo ?? 'services/services-placeholder.jpg') }}" alt=""
                             class="rounded-xl w-full h-60 object-cover">
                         <div
                             class="absolute top-2 left-2 bg-primary px-3 py-1 rounded-md text-sm font-medium text-white flex gap-2 items-center ">
@@ -42,12 +42,12 @@ new class extends Component
                         <h1 class="text-xl font-light text-overflow-ellipsis truncate uppercase">
                             {{ $service->name }}
                         </h1>
-                        <p>
+                        <p class="text-sm font-light text-overflow-ellipsis">
 
                             {{ Str::limit($service->description ?? 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam, dolorem. ', 50, '...') }}
                         </p>
                         <h1 class="text-lg font-semibold mt-2">Rp.
-                            {{ number_format(200000, 0, ',', ',') }}
+                            {{ number_format($service->price, 0, ',', ',') }}
                         </h1>
 
                     </div>
