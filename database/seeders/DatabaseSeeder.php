@@ -70,7 +70,6 @@ class DatabaseSeeder extends Seeder
                 'weekday' => $day->value,
                 'start_time' => $rangeSession[0]['session_time'],
                 'end_time' => $rangeSession[count($rangeSession) - 1]['session_time'],
-
             ]);
         }
 
@@ -78,16 +77,16 @@ class DatabaseSeeder extends Seeder
             ->count(20)
             ->create();
 
-        // Appointment::factory()
-        //     ->count(50)
-        //     ->hasService(1)
-        //     ->create(
-        //         [
-        //             'scheduled_date' => Carbon::now(),
+        Appointment::factory()
+            ->count(50)
+            ->hasService(1)
+            ->create(
+                [
+                    'scheduled_date' => Carbon::now(),
 
-        //         ]
-        //     );
+                ]
+            );
 
-        // $this->call(DoctorSeeder::class);
+        $this->call(DoctorSeeder::class);
     }
 }

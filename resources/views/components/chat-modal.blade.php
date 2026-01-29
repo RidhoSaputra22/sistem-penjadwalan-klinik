@@ -2,7 +2,7 @@
 
 use App\Models\Service;
 use App\Services\Nlp\ServiceRecommender;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Livewire\Volt\Component;
 
 new class extends Component
@@ -11,9 +11,6 @@ new class extends Component
 
     public string $keluhan = '';
 
-    /**
-     * @var array<int, array{id:int, name:string, slug:string, description:?string, score:float}>
-     */
     public ?Collection $recommendations = null;
 
     public ?string $recommendationMessage = null;
@@ -72,15 +69,15 @@ new class extends Component
             ])
             ->values()
             ->all();
+        $this->recommendations = empty($recomendtId)
+            ? collect()
+            : Service::select(['id', 'name', 'slug', 'description', 'duration_minutes', 'price'])
+                ->whereIn('id', $recomendtId)
+                ->get();
 
-        $this->recommendations = Service::query()
-            ->select(['id', 'name', 'slug', 'description', 'duration_minutes', 'price'])
-            ->whereIn('id', $recomendtId)
-            ->get();
-
-        $this->recommendationMessage = empty($this->recommendations)
-            ? 'Maaf, kami belum menemukan layanan yang cocok. Coba jelaskan gejala lebih spesifik.'
-            : 'Berikut rekomendasi layanan yang paling sesuai dengan keluhan Anda:';
+        $this->recommendationMessage = $this->recommendations->isNotEmpty()
+    ? 'Berikut rekomendasi layanan yang paling sesuai dengan keluhan Anda:'
+    : 'Maaf, kami belum menemukan layanan yang cocok. Coba jelaskan gejala lebih spesifik.';
     }
 }; ?>
 
@@ -142,7 +139,7 @@ new class extends Component
                         {{ Str::limit($service->description ?? 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam, dolorem. ', 50, '...') }}
                     </p>
                     <h1 class="text-lg font-semibold mt-2">Rp.
-                        {{ number_format(200000, 0, ',', ',') }}
+                        {{ number_format($service->price, 0, ',', '.') }}
                     </h1>
 
                 </div>

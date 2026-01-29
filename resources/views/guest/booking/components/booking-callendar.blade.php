@@ -1,17 +1,15 @@
 <?php
 
+use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
 use App\Models\Service;
 use App\Services\ReservationService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Livewire\Volt\Component;
-use App\Enums\AppointmentStatus;
-
 
 new class extends Component
 {
-
     public Service $service;
 
     public ?int $excludeAppointmentId = null;
@@ -22,8 +20,11 @@ new class extends Component
     ];
 
     public bool $isOpen = false;
+
     public string $step = 'calendar'; // calendar | time
+
     public ?string $selectedDate = null;
+
     public ?string $selectedTime = null;
 
     public function open(): void
@@ -72,7 +73,6 @@ new class extends Component
         $this->step = 'calendar';
     }
 
-
     public function with()
     {
         $events = Appointment::query()
@@ -80,12 +80,12 @@ new class extends Component
             ->when($this->excludeAppointmentId !== null, fn ($q) => $q->where('id', '!=', $this->excludeAppointmentId))
             ->where('service_id', $this->service->id)
             ->whereDate('scheduled_date', '>=', Carbon::now()->toDateString())
-            ->where('status', AppointmentStatus::CONFIRMED  )
+            ->where('status', AppointmentStatus::CONFIRMED)
             ->get()
             ->map(function (Appointment $appointment) {
                 $date = Carbon::parse((string) $appointment->scheduled_date)->toDateString();
-                $start = $date . ' ' . $appointment->scheduled_start;
-                $end = $date . ' ' . $appointment->scheduled_end;
+                $start = $date.' '.$appointment->scheduled_start;
+                $end = $date.' '.$appointment->scheduled_end;
 
                 return [
                     'title' => Str::limit($appointment->patient?->name ?? 'Pasien', 8),
@@ -169,8 +169,10 @@ new class extends Component
                 },
 
                 validRange: function (nowDate) {
+
+
                     return {
-                        start: nowDate,
+                        start: nowDate.setDate(nowDate.getDate() + 1),
                     };
                 },
 

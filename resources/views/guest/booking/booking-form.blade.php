@@ -144,7 +144,7 @@ new class extends Component
         <div
             class="space-y-5 {{ auth()->user()?->role === App\Enums\UserRole::DOCTOR ? 'opacity-50  pointer-events-none cursor-not-allowed' : '' }}">
             <div class="space-y-2">
-                <h1 class="text-4xl font-bold">Booking Sekarang</h1>
+                <h1 class="text-4xl font-bold">Reservasi Sekarang</h1>
                 <p class="text-sm font-light">Silakan isi formulir di bawah untuk melakukan pemesanan.</p>
             </div>
 
