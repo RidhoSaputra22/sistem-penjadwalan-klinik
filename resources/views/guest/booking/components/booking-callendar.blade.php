@@ -172,7 +172,7 @@ new class extends Component
 
 
                     return {
-                        start: nowDate.setDate(nowDate.getDate() + 1),
+                        start: nowDate,
                     };
                 },
 
