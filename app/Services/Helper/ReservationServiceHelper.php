@@ -98,7 +98,7 @@ class ReservationServiceHelper
         );
 
         return collect($slotTimes)
-            ->map(function (string $time) use ($date, $durationMinutes, $operationalStart, $operationalEnd, $takenIntervals, $tz, $roomIds, $activeDoctorUserIds, $availabilityByDoctor) {
+            ->map(function (string $time) use ($date, $durationMinutes, $operationalStart, $operationalEnd, $takenIntervals, $tz, $roomIds, $activeDoctorUserIds, $availabilityByDoctor, $slotTimes) {
                 $slotStart = Carbon::parse("$date $time", $tz);
                 $slotEnd = $slotStart->copy()->addMinutes($durationMinutes);
 
@@ -108,7 +108,11 @@ class ReservationServiceHelper
                     return ['time' => $time, 'available' => false];
                 }
 
-                if ($slotStart->lt($operationalStart) || $slotEnd->gt($operationalEnd)) {
+                // Slot tersedia jika waktu MULAI masih dalam jam operasional
+                // (sebelum atau sama dengan jam slot terakhir, misal 20:00)
+                // Booking boleh selesai setelah jam operasional
+                $lastSlotTime = Carbon::parse("$date {$slotTimes[count($slotTimes) - 1]}", $tz);
+                if ($slotStart->lt($operationalStart) || $slotStart->gt($lastSlotTime)) {
                     return ['time' => $time, 'available' => false];
                 }
 
@@ -584,13 +588,15 @@ class ReservationServiceHelper
         $busyRoomIds = array_values(array_unique($busyRoomIds));
 
         // Pilih dokter aktif yang punya availability di weekday & jam tersebut, dan tidak sedang sibuk.
+        // Validasi: jam mulai appointment harus ada dalam jam kerja dokter.
+        // Appointment boleh selesai setelah jam kerja dokter (misal booking terakhir 19:30, end_time 20:00, tapi layanan 90 menit selesai 21:00)
         $doctorUserId = Doctor::query()
             ->where('is_active', true)
-            ->whereHas('doctorAvailabilities', function ($q) use ($weekday, $startTime, $endTime) {
+            ->whereHas('doctorAvailabilities', function ($q) use ($weekday, $startTime) {
                 $q->where('is_active', true)
                     ->where('weekday', $weekday)
                     ->where('start_time', '<=', $startTime)
-                    ->where('end_time', '>=', $endTime);
+                    ->where('end_time', '>=', $startTime);
             })
             ->pluck('user_id')
             ->first(fn (int $id) => ! in_array($id, $busyDoctorUserIds, true));

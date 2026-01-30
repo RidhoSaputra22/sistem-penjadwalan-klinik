@@ -190,6 +190,16 @@ class ReservationService
                 durationMinutes: $durationMinutes,
             );
 
+            // validasi slot waktu dengan durasi layanan jika user memilih jam jam terakhir
+            $endTime = $scheduledAt->copy()->addMinutes($durationMinutes);
+            $closingTime = Carbon::parse($scheduledAt->toDateString().' 20:00', self::TZ);
+
+            if ($endTime->greaterThan($closingTime)) {
+                throw ValidationException::withMessages([
+                    'scheduled_date' => 'Jadwal tidak dapat dilakukan. Waktu selesai layanan ('.$endTime->format('H:i').') melewati jam operasional klinik (20:00).',
+                ]);
+            }
+
             $slot = collect($slots)->first(fn (array $s) => ($s['time'] ?? null) === $time);
             if (! $slot || ! ($slot['available'] ?? false)) {
                 throw ValidationException::withMessages([

@@ -68,4 +68,45 @@ class EditDoctor extends EditRecord
 
         return parent::mutateFormDataBeforeFill($data);
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Update data user
+        if (isset($data['name']) || isset($data['email']) || isset($data['phone']) || isset($data['title']) || isset($data['notes'])) {
+            $user = $this->record->user;
+
+            if (isset($data['name'])) {
+                $user->name = $data['name'];
+                unset($data['name']);
+            }
+
+            if (isset($data['email'])) {
+                $user->email = $data['email'];
+                unset($data['email']);
+            }
+
+            if (isset($data['phone'])) {
+                $user->phone = $data['phone'];
+                unset($data['phone']);
+            }
+
+            if (isset($data['title'])) {
+                $user->title = $data['title'];
+                unset($data['title']);
+            }
+
+            if (isset($data['notes'])) {
+                $user->notes = $data['notes'];
+                unset($data['notes']);
+            }
+
+            if (isset($data['email_verified_at'])) {
+                unset($data['email_verified_at']);
+            }
+
+            $user->save();
+        }
+
+        return parent::mutateFormDataBeforeSave($data);
+    }
 }

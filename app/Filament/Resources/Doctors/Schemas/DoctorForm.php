@@ -2,13 +2,11 @@
 
 namespace App\Filament\Resources\Doctors\Schemas;
 
-use App\Enums\UserRole;
-use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Hash;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Hash;
 
 class DoctorForm
 {
@@ -22,7 +20,7 @@ class DoctorForm
                     ->required(),
                 TextInput::make('email')
                     ->label('Email address')
-                    ->unique(table: 'users', ignoreRecord: true)
+                    ->unique(table: 'users', column: 'email', ignorable: fn ($record) => $record?->user)
                     ->email()
                     ->required(),
                 DateTimePicker::make('email_verified_at')
@@ -37,8 +35,8 @@ class DoctorForm
                 TextInput::make('password')
                     ->label('Password')
                     ->password()
-                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                    ->required(fn(string $operation): bool => $operation === 'create')
+                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                    ->required(fn (string $operation): bool => $operation === 'create')
                     ->hiddenOn('edit')
                     ->columnSpanFull(),
                 Textarea::make('notes')
