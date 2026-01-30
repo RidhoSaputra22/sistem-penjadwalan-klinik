@@ -62,30 +62,30 @@ class DatabaseSeeder extends Seeder
             ->create()
             ->first();
 
-        $rangeWeekDay = WeekdayEnum::cases();
-        $rangeSession = SesiPertemuan::all()->toArray();
-        foreach ($rangeWeekDay as $day) {
-            DoctorAvailability::create([
-                'user_id' => $doctor->user_id,
-                'weekday' => $day->value,
-                'start_time' => $rangeSession[0]['session_time'],
-                'end_time' => $rangeSession[count($rangeSession) - 1]['session_time'],
-            ]);
-        }
+        // $rangeWeekDay = WeekdayEnum::cases();
+        // $rangeSession = SesiPertemuan::all()->toArray();
+        // foreach ($rangeWeekDay as $day) {
+        //     DoctorAvailability::create([
+        //         'user_id' => $doctor->user_id,
+        //         'weekday' => $day->value,
+        //         'start_time' => $rangeSession[0]['session_time'],
+        //         'end_time' => $rangeSession[count($rangeSession) - 1]['session_time'],
+        //     ]);
+        // }
 
         Patient::factory()
             ->count(20)
             ->create();
 
-        Appointment::factory()
-            ->count(50)
-            ->hasService(1)
-            ->create(
-                [
-                    'scheduled_date' => Carbon::now(),
+        // Appointment::factory()
+        //     ->count(50)
+        //     ->hasService(1)
+        //     ->create(
+        //         [
+        //             'scheduled_date' => Carbon::now(),
 
-                ]
-            );
+        //         ]
+        //     );
 
         $this->call(DoctorSeeder::class);
     }

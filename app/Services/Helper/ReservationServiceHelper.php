@@ -102,6 +102,12 @@ class ReservationServiceHelper
                 $slotStart = Carbon::parse("$date $time", $tz);
                 $slotEnd = $slotStart->copy()->addMinutes($durationMinutes);
 
+                // Blokir slot yang sudah lewat
+                $now = Carbon::now($tz);
+                if ($slotStart->lte($now)) {
+                    return ['time' => $time, 'available' => false];
+                }
+
                 if ($slotStart->lt($operationalStart) || $slotEnd->gt($operationalEnd)) {
                     return ['time' => $time, 'available' => false];
                 }
@@ -241,7 +247,9 @@ class ReservationServiceHelper
             $start = Carbon::createFromTimeString((string) $availability->start_time)->format('H:i:s');
             $end = Carbon::createFromTimeString((string) $availability->end_time)->format('H:i:s');
 
-            if ($start <= $slotStartTime && $end >= $slotEndTime) {
+            // Slot tersedia jika waktu mulai slot ada dalam jam kerja dokter
+            // Booking boleh selesai setelah end_time (misal: slot terakhir 20:00, end_time 20:00, booking selesai 21:00)
+            if ($start <= $slotStartTime && $end >= $slotStartTime) {
                 return true;
             }
         }

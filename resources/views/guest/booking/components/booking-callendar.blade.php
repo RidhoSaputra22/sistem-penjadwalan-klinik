@@ -238,7 +238,7 @@ new class extends Component
                     {{ $selectedDate !== null ? date('d F Y', strtotime($selectedDate)) : 'xx-xx-xx' }}
                 </h1>
             </div>
-            <div class="grid grid-cols-4 gap-3">
+            <div class="grid grid-cols-6 gap-3">
                 @foreach ($availableSlotTime as $slot)
                 <button wire:click="selectTime('{{ $slot['time'] }}')"
                     class="border rounded-lg px-4 py-2 {{ $selectedTime === $slot['time'] ? 'bg-primary text-white ' : '' }} {{ ! $slot['available'] ? 'bg-gray-200 text-gray-400 cursor-not-allowed!' : 'hover:bg-primary hover:text-white' }}"
