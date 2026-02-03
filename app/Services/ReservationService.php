@@ -192,11 +192,15 @@ class ReservationService
 
             // validasi slot waktu dengan durasi layanan jika user memilih jam jam terakhir
             $endTime = $scheduledAt->copy()->addMinutes($durationMinutes);
-            $closingTime = Carbon::parse($scheduledAt->toDateString().' 20:00', self::TZ);
+            $lastAvailableSlot = collect($slots)
+                ->filter(fn (array $s) => ($s['available'] ?? false) === true)
+                ->last()['time'] ?? null;
+
+            $closingTime = Carbon::parse($scheduledAt->toDateString().' '.$lastAvailableSlot, self::TZ);
 
             if ($endTime->greaterThan($closingTime)) {
                 throw ValidationException::withMessages([
-                    'scheduled_date' => 'Jadwal tidak dapat dilakukan. Waktu selesai layanan ('.$endTime->format('H:i').') melewati jam operasional klinik (20:00).',
+                    'scheduled_date' => 'Jadwal tidak dapat dilakukan. Waktu selesai layanan ('.$endTime->format('H:i').') melewati jam operasional klinik.',
                 ]);
             }
 
@@ -208,6 +212,25 @@ class ReservationService
             }
 
             [$scheduleStart, $scheduleEnd] = ReservationServiceHelper::buildScheduleWindow($scheduledAt, $durationMinutes);
+
+            // Validasi: Cek apakah user sudah memiliki booking di jam yang sama atau overlap
+            $existingBooking = Appointment::query()
+                ->whereHas('patient', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                })
+                ->where('scheduled_date', $scheduledAt->toDateString())
+                ->where('scheduled_start', '<', $scheduleEnd->toTimeString().'')
+                ->where('scheduled_end', '>', $scheduleStart->toTimeString().'')
+
+                ->exists();
+
+            // dd($existingBooking, $scheduleStart->toTimeString(), $scheduleEnd->toTimeString(), $scheduledAt->toDateString());
+
+            if ($existingBooking) {
+                throw ValidationException::withMessages([
+                    'scheduled_date' => 'Anda sudah memiliki booking di jam yang sama atau berdekatan. Silakan pilih waktu lain.',
+                ]);
+            }
 
             $patient = ReservationServiceHelper::resolveOrCreatePatient($user);
 

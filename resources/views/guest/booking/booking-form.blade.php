@@ -115,7 +115,7 @@ new class extends Component
             $this->dispatch('booking-created');
         } catch (\Throwable $e) {
             report($e);
-            $this->addError('form', 'Terjadi kesalahan saat menyimpan reservasi. Silakan coba lagi.'.$e->getMessage());
+            $this->addError('form', 'Terjadi kesalahan saat menyimpan reservasi. '.$e->getMessage());
         }
 
     }
