@@ -2,6 +2,7 @@
 
 use App\Enums\AppointmentStatus;
 use App\Models\Appointment;
+use App\Models\Holiday;
 use App\Models\Service;
 use App\Services\ReservationService;
 use Carbon\Carbon;
@@ -91,8 +92,33 @@ new class extends Component
                     'title' => Str::limit($appointment->patient?->name ?? 'Pasien', 8),
                     'start' => $start,
                     'end' => $end,
+                    'backgroundColor' => '#3b82f6',
                 ];
             })->toArray();
+
+        // Tambahkan hari libur ke events
+        $holidays = Holiday::query()
+            ->whereDate('date', '>=', Carbon::now()->toDateString())
+            ->get()
+            ->map(function (Holiday $holiday) {
+                return [
+                    'title' => $holiday->name,
+                    'start' => $holiday->date->toDateString(),
+                    'end' => $holiday->date->toDateString(),
+                    'backgroundColor' => '#ef4444',
+                    'allDay' => true,
+                    'display' => 'background',
+                ];
+            })->toArray();
+
+        $events = array_merge($events, $holidays);
+
+        $isHoliday = false;
+        if ($this->selectedDate) {
+            $isHoliday = Holiday::query()
+                ->whereDate('date', $this->selectedDate)
+                ->exists();
+        }
 
         $availableSlotTime = ReservationService::getAvailableTimeSlots(
             date: $this->selectedDate ?? now()->format('Y-m-d'),
@@ -106,6 +132,7 @@ new class extends Component
         return [
             'events' => $events,
             'availableSlotTime' => $availableSlotTime,
+            'isHoliday' => $isHoliday,
         ];
     }
 };
@@ -237,6 +264,12 @@ new class extends Component
                     {{ $selectedDate !== null ? date('d F Y', strtotime($selectedDate)) : 'xx-xx-xx' }}
                 </h1>
             </div>
+
+            @if($isHoliday)
+            <div class="p-4 border border-red-200 bg-red-50 rounded-md text-sm text-red-700">
+                <strong>Hari Libur:</strong> Tanggal yang Anda pilih adalah hari libur. Silakan pilih tanggal lain.
+            </div>
+            @else
             <div class="grid grid-cols-6 gap-3">
                 @foreach ($availableSlotTime as $slot)
                 <button wire:click="selectTime('{{ $slot['time'] }}')"
@@ -246,6 +279,7 @@ new class extends Component
                 </button>
                 @endforeach
             </div>
+            @endif
 
             <div class="flex justify-between mt-6">
                 <button @click="step = 'calendar'; selectedDate = null; $wire.backToCalendar()"
@@ -253,9 +287,11 @@ new class extends Component
                     ← Kembali
                 </button>
 
+                @if(!$isHoliday)
                 <button wire:click="proceed" class="px-4 py-2 bg-primary text-white rounded">
                     Lanjutkan
                 </button>
+                @endif
             </div>
         </div>
 

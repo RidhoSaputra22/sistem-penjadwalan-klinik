@@ -41,6 +41,11 @@ class ReservationServiceHelper
             return [];
         }
 
+        // Cek hari libur terlebih dahulu
+        if (Holiday::query()->whereDate('date', $date)->exists()) {
+            return [];
+        }
+
         Carbon::setLocale('id');
         $tz = self::TZ;
 
