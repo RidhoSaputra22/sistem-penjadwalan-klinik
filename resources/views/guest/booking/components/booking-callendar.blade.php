@@ -97,9 +97,8 @@ new class extends Component
         $availableSlotTime = ReservationService::getAvailableTimeSlots(
             date: $this->selectedDate ?? now()->format('Y-m-d'),
             durationMinutes: $this->service->duration_minutes,
-
             excludeAppointmentId: $this->excludeAppointmentId,
-
+            userId: auth()->id(),
         );
 
         // dd($availableSlotTime, $events);

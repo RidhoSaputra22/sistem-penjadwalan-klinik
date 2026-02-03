@@ -51,6 +51,7 @@ class ReservationService
         ?int $roomId = null,
         ?int $doctorId = null,
         ?int $excludeAppointmentId = null,
+        ?int $userId = null,
     ): array {
         return ReservationServiceHelper::getAvailableTimeSlots(
             date: $date,
@@ -58,6 +59,7 @@ class ReservationService
             roomId: $roomId,
             doctorId: $doctorId,
             excludeAppointmentId: $excludeAppointmentId,
+            userId: $userId,
         );
     }
 
@@ -93,6 +95,7 @@ class ReservationService
         ?int $roomId = null,
         ?int $doctorId = null,
         ?int $excludeAppointmentId = null,
+        ?int $userId = null,
     ): array {
         return ReservationServiceHelper::getAvailableTimeSlots(
             date: $date,
@@ -100,6 +103,7 @@ class ReservationService
             roomId: $roomId,
             doctorId: $doctorId,
             excludeAppointmentId: $excludeAppointmentId,
+            userId: $userId,
         );
     }
 
@@ -188,6 +192,7 @@ class ReservationService
             $slots = $this->availableTimeSlots(
                 date: $date,
                 durationMinutes: $durationMinutes,
+                userId: $user->id,
             );
 
             // validasi slot waktu dengan durasi layanan jika user memilih jam jam terakhir
@@ -218,13 +223,15 @@ class ReservationService
                 ->whereHas('patient', function ($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })
+                ->whereIn('status', [
+                    AppointmentStatus::PENDING,
+                    AppointmentStatus::CONFIRMED,
+                    AppointmentStatus::ONGOING,
+                ])
                 ->where('scheduled_date', $scheduledAt->toDateString())
-                ->where('scheduled_start', '<', $scheduleEnd->toTimeString().'')
-                ->where('scheduled_end', '>', $scheduleStart->toTimeString().'')
-
+                ->where('scheduled_start', '<', $scheduleEnd->format('H:i:s'))
+                ->where('scheduled_end', '>', $scheduleStart->format('H:i:s'))
                 ->exists();
-
-            // dd($existingBooking, $scheduleStart->toTimeString(), $scheduleEnd->toTimeString(), $scheduledAt->toDateString());
 
             if ($existingBooking) {
                 throw ValidationException::withMessages([

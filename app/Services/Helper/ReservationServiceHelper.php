@@ -35,6 +35,7 @@ class ReservationServiceHelper
         ?int $roomId = null,
         ?int $doctorId = null,
         ?int $excludeAppointmentId = null,
+        ?int $userId = null,
     ): array {
         if (empty($date)) {
             return [];
@@ -97,8 +98,25 @@ class ReservationServiceHelper
             tz: $tz,
         );
 
+        // Ambil booking user yang sedang login untuk cek overlap
+        $userBookings = collect();
+        if ($userId !== null) {
+            $userBookings = Appointment::query()
+                ->whereHas('patient', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                })
+                ->whereDate('scheduled_date', $date)
+                ->whereIn('status', [
+                    AppointmentStatus::PENDING,
+                    AppointmentStatus::CONFIRMED,
+                    AppointmentStatus::ONGOING,
+                ])
+                ->when($excludeAppointmentId !== null, fn ($q) => $q->where('id', '!=', $excludeAppointmentId))
+                ->get();
+        }
+
         return collect($slotTimes)
-            ->map(function (string $time) use ($date, $durationMinutes, $operationalStart, $operationalEnd, $takenIntervals, $tz, $roomIds, $activeDoctorUserIds, $availabilityByDoctor, $slotTimes) {
+            ->map(function (string $time) use ($date, $durationMinutes, $operationalStart, $operationalEnd, $takenIntervals, $tz, $roomIds, $activeDoctorUserIds, $availabilityByDoctor, $slotTimes, $userBookings) {
                 $slotStart = Carbon::parse("$date $time", $tz);
                 $slotEnd = $slotStart->copy()->addMinutes($durationMinutes);
 
@@ -149,6 +167,25 @@ class ReservationServiceHelper
                 $availableRoomCount = count(array_diff($roomIds, $busyRoomIds));
                 if ($availableRoomCount <= 0) {
                     return ['time' => $time, 'available' => false];
+                }
+
+                // Cek apakah user sudah punya booking di waktu yang sama/overlap
+                if ($userBookings->isNotEmpty()) {
+                    foreach ($userBookings as $userBooking) {
+                        $userStart = $userBooking->scheduled_start
+                            ? Carbon::parse($date.' '.$userBooking->scheduled_start, $tz)
+                            : null;
+                        $userEnd = $userBooking->scheduled_end
+                            ? Carbon::parse($date.' '.$userBooking->scheduled_end, $tz)
+                            : null;
+
+                        if ($userStart && $userEnd) {
+                            // Cek overlap: slot bentrok jika mulai sebelum booking user selesai DAN selesai setelah booking user mulai
+                            if ($slotStart->lt($userEnd) && $slotEnd->gt($userStart)) {
+                                return ['time' => $time, 'available' => false];
+                            }
+                        }
+                    }
                 }
 
                 $availableDoctorCount = 0;
