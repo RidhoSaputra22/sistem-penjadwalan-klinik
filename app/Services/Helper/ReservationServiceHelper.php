@@ -121,7 +121,7 @@ class ReservationServiceHelper
         }
 
         return collect($slotTimes)
-            ->map(function (string $time) use ($date, $durationMinutes, $operationalStart, $operationalEnd, $takenIntervals, $tz, $roomIds, $activeDoctorUserIds, $availabilityByDoctor, $slotTimes, $userBookings) {
+            ->map(function (string $time) use ($date, $durationMinutes, $operationalStart, $takenIntervals, $tz, $roomIds, $activeDoctorUserIds, $availabilityByDoctor, $slotTimes, $userBookings) {
                 $slotStart = Carbon::parse("$date $time", $tz);
                 $slotEnd = $slotStart->copy()->addMinutes($durationMinutes);
 
