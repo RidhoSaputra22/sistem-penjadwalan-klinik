@@ -609,9 +609,6 @@ class ReservationService
         ];
     }
 
-    /**
-     * Algoritma FCFS → Menentukan dokter & ruangan pertama yang tersedia
-     */
     public function processReservation(Appointment $booking)
     {
         $booking->loadMissing(['service', 'patient.user']);
