@@ -10,8 +10,8 @@ use App\Models\Service;
 use App\Models\SesiPertemuan;
 use App\Models\User;
 use Carbon\Carbon;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -105,7 +105,7 @@ class AppointmentForm
                     ->label('Tanggal')
                     ->default(now()->addDays(1))
                     ->native(false)
-                    ->minDate(now())
+                    ->minDate(now()->subDays(1))
                     ->required(),
                 Select::make('scheduled_start')
                     ->label('Waktu Mulai')

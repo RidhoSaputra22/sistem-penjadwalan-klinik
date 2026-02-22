@@ -2,16 +2,16 @@
 
 namespace App\Filament\Resources\Appointments\Pages;
 
-use Filament\Actions\DeleteAction;
+use App\Filament\Resources\Appointments\AppointmentResource;
 use App\Models\Holiday;
 use App\Models\Patient;
 use App\Models\User;
 use App\Services\Helper\ReservationServiceHelper;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use App\Filament\Resources\Appointments\AppointmentResource;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 
 class EditAppointment extends EditRecord
@@ -74,7 +74,7 @@ class EditAppointment extends EditRecord
                 && ($newDate !== $oldDate || $newStart !== $oldStart);
 
             if ($scheduleChanged) {
-                $scheduledAt = Carbon::parse($newDate . ' ' . $newStart, $tz);
+                $scheduledAt = Carbon::parse($newDate.' '.$newStart, $tz);
 
                 if (Holiday::query()->whereDate('date', $scheduledAt->toDateString())->exists()) {
                     throw ValidationException::withMessages([
@@ -107,12 +107,11 @@ class EditAppointment extends EditRecord
             $record->update($data);
             $record->refresh();
 
-
             return $record;
         } catch (ValidationException $e) {
             Notification::make()
                 ->title('Gagal memperbarui appointment')
-                ->body('Periksa input Anda, terutama jadwal.')
+                ->body(implode(' ', $e->errors()['scheduled_start'] ?? ['Terjadi kesalahan validasi.']))
                 ->danger()
                 ->send();
 
@@ -129,6 +128,4 @@ class EditAppointment extends EditRecord
             throw $e;
         }
     }
-
-
 }
