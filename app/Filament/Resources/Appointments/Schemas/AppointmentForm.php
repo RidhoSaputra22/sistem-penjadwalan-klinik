@@ -151,8 +151,14 @@ class AppointmentForm
                     ->numeric()
                     ->prefix('Rp')
                     ->minValue(0)
-                    ->visible(fn (callable $get) => $get('payment_status') === PaymentStatusEnum::DP)
-                    ->helperText('Isi jika DP dihitung nominal.'),
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if (filled($state)) {
+                            $set('dp_percentage', null);
+                        }
+                    })
+                    ->visible(fn (callable $get) => $get('payment_status') === PaymentStatusEnum::DP->value)
+                    ->helperText('Isi nominal DP. Kosongkan jika menggunakan persentase.'),
 
                 TextInput::make('dp_percentage')
                     ->label('DP (%)')
@@ -160,8 +166,14 @@ class AppointmentForm
                     ->suffix('%')
                     ->minValue(0)
                     ->maxValue(100)
-                    ->visible(fn (callable $get) => $get('payment_status') === PaymentStatusEnum::DP)
-                    ->helperText('Isi jika DP dihitung persentase.'),
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if (filled($state)) {
+                            $set('dp_amount', null);
+                        }
+                    })
+                    ->visible(fn (callable $get) => $get('payment_status') === PaymentStatusEnum::DP->value)
+                    ->helperText('Isi persentase DP. Kosongkan jika menggunakan nominal.'),
 
                 // Data antrean (untuk laporan KPI: AWT/TAT/panjang antrean/no-show)
                 DateTimePicker::make('checked_in_at')

@@ -29,6 +29,7 @@ class Doctor extends Model
         'address',
         'is_active',
         'notes',
+        'photo',
     ];
 
     protected $casts = [

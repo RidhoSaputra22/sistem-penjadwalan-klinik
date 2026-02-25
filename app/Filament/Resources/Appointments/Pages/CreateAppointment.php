@@ -83,6 +83,9 @@ class CreateAppointment extends CreateRecord
                 'status' => AppointmentStatus::CONFIRMED,
                 'notes' => ! empty($data['notes']) ? (string) $data['notes'] : null,
                 'snap_token' => null,
+                'payment_status' => $data['payment_status'] ?? null,
+                'dp_amount' => filled($data['dp_amount'] ?? null) ? (float) $data['dp_amount'] : null,
+                'dp_percentage' => filled($data['dp_percentage'] ?? null) ? (float) $data['dp_percentage'] : null,
             ];
 
             if (Schema::hasColumn('appointments', 'priority_id')) {

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Doctors\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -41,6 +42,17 @@ class DoctorForm
                     ->columnSpanFull(),
                 Textarea::make('notes')
                     ->label('Catatan')
+                    ->columnSpanFull(),
+                FileUpload::make('photo')
+                    ->label('Foto Dokter')
+                    ->image()
+                    ->imageResizeMode('cover')
+                    ->imageCropAspectRatio('1:1')
+                    ->imageResizeTargetWidth('400')
+                    ->imageResizeTargetHeight('400')
+                    ->directory('doctors/photos')
+                    ->disk('public')
+                    ->visibility('public')
                     ->columnSpanFull(),
 
             ])->columns(3);

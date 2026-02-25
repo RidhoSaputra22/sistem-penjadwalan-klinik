@@ -6,6 +6,7 @@ use Filament\Tables\Table;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 
 class DoctorsTable
@@ -15,6 +16,11 @@ class DoctorsTable
         return $table
             ->columns([
                 //
+                ImageColumn::make('photo')
+                    ->label('Foto')
+                    ->disk('public')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/doctor-placeholder.jpg')),
                 TextColumn::make('user.name')
                     ->label('Name')
                     ->searchable(),
