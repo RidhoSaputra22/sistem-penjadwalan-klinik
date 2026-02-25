@@ -43,7 +43,8 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
             ->where('appointments.status', $this->selectedStatus)
             ->whereDate('appointments.scheduled_date', now()->toDateString().'')
 
-            ->orderBy('appointments.scheduled_date', 'ASC');
+            ->orderBy('appointments.scheduled_date', 'ASC')
+            ->orderBy('appointments.scheduled_start', 'ASC');
 
         return $query;
     }
@@ -91,8 +92,6 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
                     ->where('appointments.status', AppointmentStatus::CONFIRMED)
                     ->first();
 
-                // dd($nextAppointment);
-
                 if (! $nextAppointment) {
                     Notification::make()
                         ->title('Tidak ada antrian berikutnya.')
@@ -100,6 +99,25 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
                         ->send();
 
                     return;
+                }
+
+                // Cek apakah dokter yang sama sudah sedang menangani pasien lain
+                if ($nextAppointment->doctor_id) {
+                    $doctorBusy = Appointment::where('doctor_id', $nextAppointment->doctor_id)
+                        ->where('status', AppointmentStatus::ONGOING)
+                        ->exists();
+
+                    if ($doctorBusy) {
+                        $doctorName = $nextAppointment->doctor?->name ?? 'Dokter';
+
+                        Notification::make()
+                            ->title("Dokter {$doctorName} masih sedang menangani pasien lain.")
+                            ->body('Selesaikan dulu antrian yang sedang berlangsung sebelum memanggil antrian berikutnya.')
+                            ->warning()
+                            ->send();
+
+                        return;
+                    }
                 }
 
                 $nextAppointment->update([
