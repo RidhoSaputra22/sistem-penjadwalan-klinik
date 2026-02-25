@@ -4,12 +4,13 @@ use Livewire\Volt\Component;
 
 new class extends Component
 {
-
-    public function search(string $q){
+    public function search(string $q)
+    {
         $this->redirect(route('guest.doctor.search', ['q' => $q]));
     }
 
-    public function with(){
+    public function with()
+    {
         return [
             'doctors' => \App\Models\Doctor::take(5)->get(),
         ];
@@ -32,7 +33,7 @@ new class extends Component
                 </svg>
 
             </span>
-            <input  wire:keydown.enter="search($event.target.value)"
+            <input wire:keydown.enter="search($event.target.value)"
                 class="w-full pl-10 px-3 py-2 rounded-lg border border-primary bg-white placeholder:text-primary focus:shadow-md focus:outline-none"
                 placeholder="Cari Dokter" autocomplete="off">
 
@@ -48,8 +49,8 @@ new class extends Component
                     <div class="absolute top-4 left-4">
                         <img src="{{ asset('images/logo.jpg') }}" alt="" class="w-7 h-7 rounded-sm">
                     </div>
-                    <img src="{{ asset('images/doctor-placeholder.jpg') }}" alt=""
-                        class="h-60 w-full  object-cover  rounded-lg bg-gray-50">
+                    <img src="{{ $doctor->photo == '' ? asset('images/doctor-placeholder.jpg') : Storage::url($doctor->photo) }}"
+                        alt="" class="h-60 w-full  object-cover  rounded-lg bg-gray-50">
                 </div>
                 <div class="px-4 pb-4 space-y-2">
                     <h3 class="font-semibold text-gray-800 leading-snug truncate">
