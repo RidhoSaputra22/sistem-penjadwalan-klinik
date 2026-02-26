@@ -3,16 +3,16 @@
 namespace App\Filament\Resources\Appointments\Pages;
 
 use App\Enums\AppointmentStatus;
+use App\Filament\Resources\Appointments\AppointmentResource;
 use App\Models\Appointment;
 use App\Models\Holiday;
 use App\Models\Patient;
 use App\Models\Service;
 use App\Services\Helper\ReservationServiceHelper;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Resources\Pages\CreateRecord;
-use App\Filament\Resources\Appointments\AppointmentResource;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
@@ -37,7 +37,7 @@ class CreateAppointment extends CreateRecord
                 : (string) $rawScheduledDate;
             $scheduledStart = (string) ($data['scheduled_start'] ?? '');
 
-            $scheduledAt = Carbon::parse(trim($scheduledDate . ' ' . $scheduledStart), $tz);
+            $scheduledAt = Carbon::parse(trim($scheduledDate.' '.$scheduledStart), $tz);
 
             if (Holiday::query()->whereDate('date', $scheduledAt->toDateString())->exists()) {
                 throw ValidationException::withMessages([
@@ -109,7 +109,7 @@ class CreateAppointment extends CreateRecord
             throw $e;
         } catch (\Exception $e) {
             Notification::make()
-                ->title('Error creating appointment: ' . $e->getMessage())
+                ->title('Error creating appointment: '.$e->getMessage())
                 ->danger()
                 ->send();
 

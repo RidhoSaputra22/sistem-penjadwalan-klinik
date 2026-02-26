@@ -79,6 +79,7 @@ new class extends Component
             return;
         }
 
+        // Validasi input form
         $this->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
@@ -94,9 +95,11 @@ new class extends Component
         ]);
 
         try {
+            // Konversi tanggal & waktu ke format yang sesuai untuk penyimpanan, dengan timezone Asia/Makassar
             $tz = 'Asia/Makassar';
             $scheduledDate = Carbon::parse("{$this->booking_date} {$this->booking_time}", $tz);
 
+            // Buat reservasi menggunakan service, yang akan menangani logika penyimpanan dan integrasi pembayaran
             $reservationService = new \App\Services\ReservationService;
             $result = $reservationService->createReservation([
                 'name' => $this->name,

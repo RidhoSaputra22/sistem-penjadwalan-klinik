@@ -19,6 +19,5 @@ new class extends Component
     {{-- End Content --}}
 
 
-
     @livewire('layouts.footter')
 </div>

@@ -29,15 +29,6 @@ new class extends Component
         $this->dispatch('changeAuthModalTab', tab: 'login');
     }
 
-    public function mount()
-    {
-        $this->name = 'Test User';
-        $this->email = 'testuser@gmail.com';
-        $this->phone = '081234567890';
-        $this->password = 'password123';
-        $this->confirmPassword = 'password123';
-    }
-
     public function regist(): void
     {
         // Rate limit (anti spam/bruteforce sederhana)
@@ -80,6 +71,7 @@ new class extends Component
             ]
         );
 
+        // Transaksi untuk memastikan integritas data
         DB::transaction(function () use ($validated) {
             $user = User::create([
                 'name' => $validated['name'],
@@ -92,12 +84,14 @@ new class extends Component
             event(new Registered($user));
         });
 
+        // Auto-login setelah registrasi
         session()->flash('alert', [
             'type' => 'success',
             'message' => 'Login berhasil!',
             'description' => 'Selamat datang kembali di Klinik Goaria.',
         ]);
 
+        // Sukses login: reset throttle & cegah session fixation
         Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']]);
         session()->regenerate();
 

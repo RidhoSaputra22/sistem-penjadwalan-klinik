@@ -1,14 +1,14 @@
 <?php
 
-use Livewire\Volt\Component;
-use Illuminate\Database\Eloquent\Builder;
 use App\Models\Doctor;
 use App\Models\Service;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Volt\Component;
 
-new class extends Component {
-
-
+new class extends Component
+{
     public string $q = '';
+
     public ?int $service = null;
 
     public function mount(): void

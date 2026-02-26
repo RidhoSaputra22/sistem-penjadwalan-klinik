@@ -15,14 +15,17 @@ new class extends Component
 
     public ?string $recommendationMessage = null;
 
+    // reset rekomendasi ketika modal ditutup
     public function resetRecommendation(): void
     {
         $this->recommendations = null;
         $this->recommendationMessage = null;
     }
 
+    // logika rekomendasi layanan berdasarkan keluhan menggunakan NLP sederhana
     public function getServiceRecommendation(): void
     {
+        // Validasi input keluhan (minimal 5 karakter untuk hasil yang lebih relevan)
         $this->validate([
             'keluhan' => ['required', 'string', 'min:5', 'max:500'],
         ], [
@@ -31,10 +34,12 @@ new class extends Component
             'keluhan.max' => 'Keluhan terlalu panjang. Maksimal 500 karakter.',
         ]);
 
+        // Ambil semua layanan sebagai "dokumen" untuk direkomendasikan (hati-hati jika jumlah layanan sangat banyak, bisa dipertimbangkan caching atau pre-komputasi embedding untuk skala besar)
         $services = Service::query()
             ->select(['id', 'name', 'slug', 'description', 'duration_minutes', 'price'])
             ->get();
 
+        // Jika tidak ada layanan, langsung set pesan rekomendasi dan keluar
         if ($services->isEmpty()) {
             $this->recommendations = null;
             $this->recommendationMessage = 'Belum ada data layanan untuk direkomendasikan.';
@@ -42,6 +47,7 @@ new class extends Component
             return;
         }
 
+        // Siapkan "dokumen" untuk NLP: gabungkan nama dan deskripsi layanan sebagai teks yang akan dianalisis
         $documents = $services
             ->map(function (Service $s) {
                 $text = trim(($s->name ?? '').' '.($s->description ?? ''));
@@ -59,6 +65,7 @@ new class extends Component
             ->values()
             ->all();
 
+        //
         $ranked = (new ServiceRecommender)->rank($this->keluhan, $documents, limit: 3, minScore: 0.08);
         // dd($ranked);
 

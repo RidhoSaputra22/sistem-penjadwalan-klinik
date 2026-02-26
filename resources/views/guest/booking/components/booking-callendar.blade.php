@@ -76,6 +76,7 @@ new class extends Component
 
     public function with()
     {
+        // Ambil semua appointment yang sudah dikonfirmasi untuk layanan ini (kecuali yang sedang diedit jika ada) dan jadikan event untuk FullCalendar
         $events = Appointment::query()
             ->with(['patient', 'service'])
             ->when($this->excludeAppointmentId !== null, fn ($q) => $q->where('id', '!=', $this->excludeAppointmentId))
@@ -113,6 +114,7 @@ new class extends Component
 
         $events = array_merge($events, $holidays);
 
+        // Cek apakah tanggal yang dipilih adalah hari libur
         $isHoliday = false;
         if ($this->selectedDate) {
             $isHoliday = Holiday::query()
@@ -120,6 +122,7 @@ new class extends Component
                 ->exists();
         }
 
+        // Ambil slot waktu yang tersedia untuk tanggal yang dipilih, dengan mempertimbangkan durasi layanan dan appointment yang sudah ada
         $availableSlotTime = ReservationService::getAvailableTimeSlots(
             date: $this->selectedDate ?? now()->format('Y-m-d'),
             durationMinutes: $this->service->duration_minutes,

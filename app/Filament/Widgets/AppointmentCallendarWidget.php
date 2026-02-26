@@ -35,6 +35,7 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
 
     public function getAppontmentsQuery()
     {
+        // Query untuk mengambil appointment berdasarkan status yang dipilih, dengan relasi doctor, patient.user, dan room, serta filter tanggal hari ini
         $query = Appointment::query()
             ->select('appointments.*')
             ->join('services', 'appointments.service_id', '=', 'services.id')
@@ -88,10 +89,12 @@ class AppointmentCallendarWidget extends Widget implements HasActions, HasSchema
             ->icon('heroicon-o-megaphone')
             ->requiresConfirmation()
             ->action(function (): void {
+                // Ambil antrian berikutnya yang berstatus CONFIRMED dan jadwalkan untuk hari ini, urutkan berdasarkan waktu terdekat
                 $nextAppointment = $this->getAppontmentsQuery()
                     ->where('appointments.status', AppointmentStatus::CONFIRMED)
                     ->first();
 
+                // Jika tidak ada antrian berikutnya, tampilkan notifikasi dan keluar
                 if (! $nextAppointment) {
                     Notification::make()
                         ->title('Tidak ada antrian berikutnya.')

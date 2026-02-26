@@ -3,24 +3,22 @@
 use Livewire\Attributes\On;
 use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     //
 
     public string $servicesSlug = '';
-
 
     public function mount($slug)
     {
         $this->servicesSlug = $slug;
 
-
     }
-
 
     #[On('payment-success')]
     public function handlePaymentSuccess($payload)
     {
-        $service = new \App\Services\ReservationService();
+        $service = new \App\Services\ReservationService;
         $result = $service->processPaymentResult(is_array($payload) ? $payload : []);
         $payload = $payload ?? [];
 
@@ -32,9 +30,8 @@ new class extends Component {
 
             $this->dispatch('open-alert', 'success', 'Pembayaran berhasil!', 'Pembayaran Anda telah berhasil diproses.');
 
-
         } else {
-        $this->dispatch('open-alert', 'error', 'Terjadi kesalahan pada proses pembayaran.', 'Silakan coba lagi atau hubungi layanan pelanggan.');
+            $this->dispatch('open-alert', 'error', 'Terjadi kesalahan pada proses pembayaran.', 'Silakan coba lagi atau hubungi layanan pelanggan.');
         }
     }
 
@@ -56,10 +53,8 @@ new class extends Component {
         $this->dispatch('open-alert', 'error', 'Pembayaran Gagal', 'Terjadi kesalahan pada proses pembayaran. Silakan coba lagi atau hubungi layanan pelanggan.');
     }
 
-
-
-
-    public function with(){
+    public function with()
+    {
 
         $service = \App\Models\Service::with('category')->where('slug', $this->servicesSlug)->firstOrFail();
 
@@ -68,8 +63,6 @@ new class extends Component {
 
         ];
     }
-
-
 }; ?>
 
 <div>

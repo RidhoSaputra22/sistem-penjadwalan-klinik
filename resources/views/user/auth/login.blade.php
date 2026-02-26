@@ -12,7 +12,7 @@ new class extends Component {
     public function login(): void
     {
 
-
+        // validasi Input
         $validated = $this->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
@@ -26,6 +26,7 @@ new class extends Component {
         // Throttle untuk mencegah brute force
         $throttleKey = \Illuminate\Support\Str::lower($validated['email']) . '|' . request()->ip();
 
+        // Jika terlalu banyak percobaan, beri tahu pengguna dan blok sementara
         if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($throttleKey, 5)) {
             $seconds = \Illuminate\Support\Facades\RateLimiter::availableIn($throttleKey);
 
@@ -39,6 +40,7 @@ new class extends Component {
             return;
         }
 
+        // Coba autentikasi dengan email & password
         if (! Auth::attempt(['email' => $validated['email'], 'password' => $validated['password']])) {
             \Illuminate\Support\Facades\RateLimiter::hit($throttleKey, 60);
 
